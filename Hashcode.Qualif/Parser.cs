@@ -21,6 +21,7 @@ namespace Hashcode.Qualif
                     //fill input
                 }
             }
+            return input;
         }
     }
 }

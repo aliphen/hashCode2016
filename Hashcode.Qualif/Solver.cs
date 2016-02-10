@@ -9,19 +9,16 @@ namespace Hashcode.Qualif
 {
 	public class Solver
 	{
-        public static void Solve(Input input)
+        public static Solution Solve(Input input)
         {
-            var sb = new StringBuilder();
-            int score = 0;
+            var solution = new Solution();
 
             //TODO : do stuff
             Debug.Assert(true, "optional message");
+            solution.Builder.AppendLine("0");
+            solution.Score++;
 
-            //write output file
-            using(var writer = new StreamWriter("../../" + score + ".out"))
-            {
-                writer.Write(sb);
-            }
+            return solution;
         }
 	}
 }
