@@ -41,5 +41,11 @@
     <Compile Include="Input.cs" />
     <Compile Include="Solver.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>$(SolutionDir)/packages/7-Zip.CommandLine.9.20.0/tools/7za.exe a $(ProjectDir)/code.zip $(ProjectDir)/*.cs</PostBuildEvent>
+  </PropertyGroup>
 </Project>
