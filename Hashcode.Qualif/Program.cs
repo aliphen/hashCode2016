@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Hashcode.Qualif
 {
@@ -6,7 +7,10 @@ namespace Hashcode.Qualif
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            const string fileName = "../../file.in"; //put input file where sources are
+            var input = Parser.Parse(fileName);
+
+            Solver.Solve(input);
         }
     }
 }
