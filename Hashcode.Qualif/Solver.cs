@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Diagnostics;
 using System.Collections.Generic;
 
 namespace Hashcode.Qualif
@@ -14,7 +13,7 @@ namespace Hashcode.Qualif
             var solution = new Solution();
 
             //TODO : do stuff
-            Debug.Assert(true, "optional message");
+            Helper.Assert(() => true, "optional message");
             solution.Builder.AppendLine("0");
             solution.Score++;
 
