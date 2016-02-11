@@ -31,6 +31,7 @@ namespace Hashcode.Qualif
                     input.WareHouses[i] = new WareHouse{ 
                         X = coords[0], 
                         Y = coords[1],
+                        id = i,
                         Stock = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray(),
                     };
                 }

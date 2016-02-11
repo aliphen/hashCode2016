@@ -10,6 +10,7 @@ namespace Hashcode.Qualif
         public int X;
         public int Y;
         public int[] Stock;
+        public int id;
 
         public bool HasItem(int productId)
         {
@@ -33,6 +34,7 @@ namespace Hashcode.Qualif
         public int NbItems;
         public int[] ItemsWanted; //types of objects
         public int id;
+
     }
 
     /// <summary>
