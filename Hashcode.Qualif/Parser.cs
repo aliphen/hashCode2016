@@ -15,7 +15,7 @@ namespace Hashcode.Qualif
 //                input.R = inputParams[0];
 //                input.C = inputParams[1];
 
-                for(int i = 0; i < nbLines; i++)
+                for(int i = 0; i < /*nbLines*/0; i++)
                 {
                     var line = reader.ReadLine().Split(' ').Select(Int32.Parse);
                     //fill input

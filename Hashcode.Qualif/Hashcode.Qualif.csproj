@@ -46,6 +46,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)/packages/7-Zip.CommandLine.9.20.0/tools/7za.exe a $(ProjectDir)/code.zip $(ProjectDir)/*.cs</PostBuildEvent>
+    <PostBuildEvent Condition="'$(OS)' == 'Windows_NT'">
+    	$(SolutionDir)/packages/7-Zip.CommandLine.9.20.0/tools/7za.exe a $(ProjectDir)/code.zip $(ProjectDir)/*.cs
+    </PostBuildEvent>
+    <PostBuildEvent Condition="'$(OS)' != 'Windows_NT'">
+    	zip $(ProjectDir)/code.zip $(ProjectDir)/*.cs
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
