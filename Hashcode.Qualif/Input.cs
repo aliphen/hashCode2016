@@ -8,6 +8,12 @@ namespace Hashcode.Qualif
         public int X;
         public int Y;
         public int[] Stock;
+
+        // Distance to a client
+        public int DistanceTo(Order order)
+        {
+            return (int)Math.Ceiling(Math.Sqrt(Math.Pow(X - order.X, 2) + Math.Pow(Y - order.Y, 2)));
+        }
     }
 
     public class Order
