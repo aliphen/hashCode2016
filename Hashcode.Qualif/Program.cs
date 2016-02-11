@@ -8,7 +8,9 @@ namespace Hashcode.Qualif
     {
         public static void Main(string[] args)
         {
-            const string fileName = "../../file.in"; //put input file where sources are
+            const string fileName = "../../busy_day.in";
+//            const string fileName = "../../mother_of_all_warehouses.in";
+//            const string fileName = "../../redundancy.in";
             var input = Parser.Parse(fileName);
 
             var sw = Stopwatch.StartNew();

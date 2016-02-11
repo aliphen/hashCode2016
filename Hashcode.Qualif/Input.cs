@@ -36,7 +36,7 @@ namespace Hashcode.Qualif
 
         public int NbWareHouses;
 
-        public WareHouse[] WareHouseLocation;
+        public WareHouse[] WareHouses;
         public Order[] Orders;
 	}
 }

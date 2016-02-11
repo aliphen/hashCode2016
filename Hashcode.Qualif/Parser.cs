@@ -22,12 +22,12 @@ namespace Hashcode.Qualif
                 input.ProductTypes = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
 
                 input.NbWareHouses = Int32.Parse(reader.ReadLine());
-                input.WareHouseLocation = new WareHouse[input.NbWareHouses];
+                input.WareHouses = new WareHouse[input.NbWareHouses];
 
                 for(int i = 0; i < input.NbWareHouses; i++)
                 {
                     var coords = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
-                    input.NbWareHouses[i] = new WareHouse{ 
+                    input.WareHouses[i] = new WareHouse{ 
                         X = coords[0], 
                         Y = coords[1],
                         Stock = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray(),
@@ -43,6 +43,7 @@ namespace Hashcode.Qualif
                         X = coords[0], 
                         Y = coords[1],
                         NbItems = Int32.Parse(reader.ReadLine()),
+                        ItemsWanted = new int[input.ProductTypes.Length],
                     };
                     var itemTypes = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
                     for(int j = 0; j < input.ProductTypes.Length; j++)
