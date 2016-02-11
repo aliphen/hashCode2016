@@ -43,13 +43,8 @@ namespace Hashcode.Qualif
                         X = coords[0], 
                         Y = coords[1],
                         NbItems = Int32.Parse(reader.ReadLine()),
-                        ItemsWanted = new int[input.ProductTypes.Length],
+                        ItemsWanted = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray(),
                     };
-                    var itemTypes = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
-                    for(int j = 0; j < input.ProductTypes.Length; j++)
-                    {
-                        input.Orders[i].ItemsWanted[j] = itemTypes.Count(t => t == j); //count nb of items of type j
-                    }
                 }
             }
             return input;

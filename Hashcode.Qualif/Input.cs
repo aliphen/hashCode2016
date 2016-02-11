@@ -15,10 +15,7 @@ namespace Hashcode.Qualif
         public int X;
         public int Y;
         public int NbItems;
-        /// <summary>
-        /// index is type, content is quantity
-        /// </summary>
-        public int[] ItemsWanted;
+        public int[] ItemsWanted; //types of objects
     }
 
     /// <summary>

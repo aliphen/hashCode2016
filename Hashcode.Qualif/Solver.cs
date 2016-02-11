@@ -10,12 +10,12 @@ namespace Hashcode.Qualif
 	{
         public static Solution Solve(Input input)
         {
+            int nbCommands = 0;
             var solution = new Solution();
 
-            //TODO : do stuff
             Helper.Assert(() => true, "optional message");
-            solution.Builder.AppendLine("0");
-            solution.Score++;
+
+
 
             return solution;
         }
