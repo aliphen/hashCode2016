@@ -52,7 +52,7 @@ namespace Hashcode.Qualif
                     }
 
                     var load = String.Format("{0} L {1} {2} {3}", chosen.id, w, itemType, 1);
-                    chosen.Load(wh);
+                    chosen.Load(wh, itemType);
                     var deli = String.Format("{0} D {1} {2} {3}", chosen.id, o, itemType, 1);
                     chosen.Deliver(order);
 
