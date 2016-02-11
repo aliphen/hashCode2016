@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -36,6 +37,7 @@ namespace Hashcode.Qualif
 
                 var nbOrders = Int32.Parse(reader.ReadLine());
                 input.Orders = new Order[nbOrders];
+                input.OrderIdToOrder = new Dictionary<int, Order>(nbOrders);
                 for(int i = 0; i < nbOrders; i++)
                 {
                     var coords = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
@@ -45,6 +47,7 @@ namespace Hashcode.Qualif
                         NbItems = Int32.Parse(reader.ReadLine()),
                         ItemsWanted = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray(),
                     };
+                    input.OrderIdToOrder.Add(i, input.Orders[i]);
                 }
             }
             return input;

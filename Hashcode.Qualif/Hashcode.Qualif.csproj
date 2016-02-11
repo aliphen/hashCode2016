@@ -41,6 +41,7 @@
     <Compile Include="Input.cs" />
     <Compile Include="Solver.cs" />
     <Compile Include="Drone.cs" />
+    <Compile Include="SolverAlex.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

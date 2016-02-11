@@ -34,7 +34,7 @@ namespace Hashcode.Qualif
             return solution;
         }*/
 
-        public static double[] ScoreAllOrder(Input input, Drone drone)
+        public static Dictionary<int, Order> ScoreAllOrder(Input input, Drone drone)
         {
             var orderScores = new double[input.Orders.Length];
             var i = 0;
@@ -43,9 +43,8 @@ namespace Hashcode.Qualif
                 orderScores[i] = ScoreOrder(order, input, drone);
                 i++;
             }
-
-            // Sort to have the smallest score first
-            return orderScores.OrderBy(d => d).ToArray();
+            // order the dico of orders according to that score
+            return input.OrderIdToOrder.OrderBy(d => orderScores[d.Key]).ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
 
