@@ -18,7 +18,7 @@ namespace Hashcode.Qualif
             Console.WriteLine("Done, " + sw.ElapsedMilliseconds + "ms elapsed");
 
             //write output file
-            var outputFile = solution.Score + ".out";
+            var outputFile = Path.GetFileNameWithoutExtension(fileName) + "-" + solution.Score + ".out";
             using (var writer = new StreamWriter("../../" + outputFile))
             {
                 writer.Write(solution);
