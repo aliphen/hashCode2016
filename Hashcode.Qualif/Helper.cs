@@ -19,7 +19,9 @@ namespace Hashcode.Qualif
         // Distance to a client
         public static int Distance(int x1, int y1, int x2, int y2)
         {
-            return (int)Math.Ceiling(Math.Sqrt(Math.Pow(x1 - x2, 2) + Math.Pow(y1 - y2, 2)));
+            return (int) Math.Ceiling(Math.Sqrt(Math.Pow(x1 - x2, 2) + Math.Pow(y1 - y2, 2)));
         }
+
+        
     }
 }
