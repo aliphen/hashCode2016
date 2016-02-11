@@ -13,6 +13,18 @@ namespace Hashcode.Qualif
             X = input.WareHouses[0].X;
             Y = input.WareHouses[0].Y;
         }
+
+        public void Load(WareHouse wh)
+        {
+            X = wh.X;
+            Y = wh.Y;
+        }
+
+        public void Deliver(Order o)
+        {
+            X = o.X;
+            Y = o.Y;
+        }
     }
 }
 
