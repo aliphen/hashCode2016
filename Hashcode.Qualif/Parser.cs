@@ -11,14 +11,44 @@ namespace Hashcode.Qualif
             var input = new Input();
             using(var reader = new StreamReader(fileName))
             {
-                var inputParams = reader.ReadLine().Split(' ').Select(Int32.Parse);
-//                input.R = inputParams[0];
-//                input.C = inputParams[1];
+                var inputParams = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
+                input.R = inputParams[0];
+                input.C = inputParams[1];
+                input.NbDrones = inputParams[2];
+                input.NbTurns = inputParams[3];
+                input.MaxPayload = inputParams[4];
 
-                for(int i = 0; i < /*nbLines*/0; i++)
+                reader.ReadLine(); //nb product types, osef
+                input.ProductTypes = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
+
+                input.NbWareHouses = Int32.Parse(reader.ReadLine());
+                input.WareHouseLocation = new WareHouse[input.NbWareHouses];
+
+                for(int i = 0; i < input.NbWareHouses; i++)
                 {
-                    var line = reader.ReadLine().Split(' ').Select(Int32.Parse);
-                    //fill input
+                    var coords = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
+                    input.NbWareHouses[i] = new WareHouse{ 
+                        X = coords[0], 
+                        Y = coords[1],
+                        Stock = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray(),
+                    };
+                }
+
+                var nbOrders = Int32.Parse(reader.ReadLine());
+                input.Orders = new Order[nbOrders];
+                for(int i = 0; i < nbOrders; i++)
+                {
+                    var coords = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
+                    input.Orders[i] = new Order {
+                        X = coords[0], 
+                        Y = coords[1],
+                        NbItems = Int32.Parse(reader.ReadLine()),
+                    };
+                    var itemTypes = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
+                    for(int j = 0; j < input.ProductTypes.Length; j++)
+                    {
+                        input.Orders[i].ItemsWanted[j] = itemTypes.Count(t => t == j); //count nb of items of type j
+                    }
                 }
             }
             return input;
