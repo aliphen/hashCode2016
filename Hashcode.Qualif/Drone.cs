@@ -23,7 +23,7 @@ namespace Hashcode.Qualif
         public bool CheckLoad(WareHouse wh, int itemType)
         {
             var tmpturn = turn + Helper.Distance(X, Y, wh.X, wh.Y) + 1;
-            if (tmpturn < input.NbTurns)
+            if (tmpturn > input.NbTurns)
             {
                 turn++; //send it to the future
                 return false;
