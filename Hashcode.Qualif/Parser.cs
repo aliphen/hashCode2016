@@ -47,6 +47,7 @@ namespace Hashcode.Qualif
                         NbItems = Int32.Parse(reader.ReadLine()),
                         ItemsWanted = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray(),
                     };
+                    Array.Sort(input.Orders[i].ItemsWanted);
                     input.OrderIdToOrder.Add(i, input.Orders[i]);
                 }
             }

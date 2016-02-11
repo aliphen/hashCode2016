@@ -8,6 +8,8 @@ namespace Hashcode.Qualif
 {
 	public class Solver
 	{
+        private static int newLineLenght = Environment.NewLine.Length;
+
         public static Solution Solve(Input input)
         {
             int nbCommands = 0;
@@ -39,6 +41,9 @@ namespace Hashcode.Qualif
 
                     var sbDeli = new StringBuilder();
                     var nbDeli = 0;
+                    int previtem = -1;
+                    int prevwh = -1;
+                    var currentCount = 1;
                     while(i < order.ItemsWanted.Length)
                     {
                         var itemType = order.ItemsWanted[i];
@@ -63,12 +68,32 @@ namespace Hashcode.Qualif
                         }
                         wh.Stock[itemType]--;
                         chosen.Load(wh, itemType);
-                        nbCommands++;
-                        solution.Builder.AppendLine(load);
 
                         var deli = String.Format("{0} D {1} {2} {3}", chosen.id, o, itemType, 1);
-                        nbDeli++;
-                        sbDeli.AppendLine(deli);
+
+                        if (itemType != previtem || prevwh != w)
+                        {
+                            currentCount = 1;
+                            previtem = itemType;
+                            prevwh = w;
+
+                            solution.Builder.AppendLine(load);
+                            nbCommands++;
+
+                            nbDeli++;
+                            sbDeli.AppendLine(deli);
+                        }
+                        else
+                        {
+                            chosen.turn--; //loading is free because it's in the same instruction
+                            currentCount++;
+                            solution.Builder.Remove(solution.Builder.Length - 1 - newLineLenght, newLineLenght + 1);//remove last char AND line break
+                            solution.Builder.AppendLine(currentCount.ToString());
+
+                            sbDeli.Remove(sbDeli.Length - 1 - newLineLenght, newLineLenght + 1);//remove last char AND line break
+                            sbDeli.AppendLine(currentCount.ToString());
+                        }
+
                         i++;
                     }
 
