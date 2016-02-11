@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 
 namespace Hashcode.Qualif
 {
@@ -31,6 +32,7 @@ namespace Hashcode.Qualif
         public int Y;
         public int NbItems;
         public int[] ItemsWanted; //types of objects
+        public int id;
     }
 
     /// <summary>

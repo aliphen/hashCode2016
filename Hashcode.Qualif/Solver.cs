@@ -22,6 +22,22 @@ namespace Hashcode.Qualif
                 drones[d] = new Drone(input, d);
             }
 
+
+            Array.Sort(input.Orders, (order, order1) =>
+            {
+                if (order.NbItems == order1.NbItems)
+                {
+                    return 0;
+                }
+                else if (order.NbItems > order1.NbItems)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return -1;
+                }
+            });
             for(int o = 0; o < input.Orders.Length; o++)
             {
                 var order = input.Orders[o];
@@ -69,7 +85,7 @@ namespace Hashcode.Qualif
                         wh.Stock[itemType]--;
                         chosen.Load(wh, itemType);
 
-                        var deli = String.Format("{0} D {1} {2} {3}", chosen.id, o, itemType, 1);
+                        var deli = String.Format("{0} D {1} {2} {3}", chosen.id, order.id, itemType, 1);
 
                         if (itemType != previtem || prevwh != w)
                         {
