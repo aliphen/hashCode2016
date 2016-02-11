@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Hashcode.Qualif
 {
@@ -9,7 +10,19 @@ namespace Hashcode.Qualif
         public int Y;
         public int[] Stock;
 
+        public bool HasItem(int productId)
+        {
+            return Stock[productId] > 0;
+        }
 
+        public bool CanFullfillOrder(Order order)
+        {
+            if (order.ItemsWanted.Any(productId => !HasItem(productId)))
+            {
+                return false;
+            }
+            return true;
+        }
     }
 
     public class Order
