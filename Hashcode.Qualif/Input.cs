@@ -8,6 +8,8 @@ namespace Hashcode.Qualif
         public int X;
         public int Y;
         public int[] Stock;
+
+
     }
 
     public class Order
