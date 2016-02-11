@@ -50,7 +50,6 @@ namespace Hashcode.Qualif
                             wh = input.WareHouses[w];
                             if(wh.Stock[itemType] > 0)
                             {
-                                wh.Stock[itemType]--;
                                 break;
                             }
                         }
@@ -62,6 +61,7 @@ namespace Hashcode.Qualif
                             i--; //treat object again
                             break;
                         }
+                        wh.Stock[itemType]--;
                         chosen.Load(wh, itemType);
                         nbCommands++;
                         solution.Builder.AppendLine(load);
