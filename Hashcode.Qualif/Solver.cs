@@ -37,31 +37,53 @@ namespace Hashcode.Qualif
                         goto end;
                     }
 
-                    var itemType = order.ItemsWanted[i];
+                    var sbDeli = new StringBuilder();
+                    var nbDeli = 0;
+                    while(i < order.ItemsWanted.Length)
+                    {
+                        var itemType = order.ItemsWanted[i];
 
-                    //find warehouse with item in stock
-                    int w;
-                    WareHouse wh = null;
-                    for (w = 0; w < input.NbWareHouses; w++) {
-                        wh = input.WareHouses[w];
-                        if(wh.Stock[itemType] > 0)
+                        //find warehouse with item in stock
+                        int w;
+                        WareHouse wh = null;
+                        for (w = 0; w < input.NbWareHouses; w++) {
+                            wh = input.WareHouses[w];
+                            if(wh.Stock[itemType] > 0)
+                            {
+                                wh.Stock[itemType]--;
+                                break;
+                            }
+                        }
+
+                        var load = String.Format("{0} L {1} {2} {3}", chosen.id, w, itemType, 1);
+                        if(!chosen.CheckLoad(wh, itemType))
                         {
-                            wh.Stock[itemType]--;
+                            //drone passed end of turns
+                            i--; //treat object again
                             break;
                         }
+                        chosen.Load(wh, itemType);
+                        nbCommands++;
+                        solution.Builder.AppendLine(load);
+
+                        var deli = String.Format("{0} D {1} {2} {3}", chosen.id, o, itemType, 1);
+                        nbDeli++;
+                        sbDeli.AppendLine(deli);
+                        i++;
                     }
 
-                    var load = String.Format("{0} L {1} {2} {3}", chosen.id, w, itemType, 1);
-                    chosen.Load(wh, itemType);
-                    var deli = String.Format("{0} D {1} {2} {3}", chosen.id, o, itemType, 1);
-                    chosen.Deliver(order);
-
-                    if(chosen.turn <= input.NbTurns)
+                    bool enoughTime = true;
+                    for (int dd = 0; dd < nbDeli; dd++) {
+                        if(!chosen.Deliver(order))
+                        {
+                            //drone passed end of turns
+                            enoughTime = false;
+                        }
+                    }
+                    if(enoughTime)
                     {
-                        //validate move
-                        solution.Builder.AppendLine(load);
-                        solution.Builder.AppendLine(deli);
-                        nbCommands += 2;
+                        solution.Builder.Append(sbDeli.ToString());
+                        nbCommands += nbDeli;
                     }
                 }
             }
