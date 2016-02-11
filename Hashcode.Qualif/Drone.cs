@@ -7,9 +7,11 @@ namespace Hashcode.Qualif
         public int X;
         public int Y;
         public int turn = 0;
+        public int id;
 
-        public Drone(Input input)
+        public Drone(Input input, int id)
         {
+            this.id = id;
             X = input.WareHouses[0].X;
             Y = input.WareHouses[0].Y;
         }
