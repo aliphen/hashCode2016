@@ -24,19 +24,21 @@ namespace Hashcode.Qualif
 
 
             Array.Sort(input.Orders, (order, order1) =>
-            {
-                if (order.NbItems == order1.NbItems)
                 {
-                    return 0;
-                }
-                else if (order.NbItems > order1.NbItems)
-                {
-                    return 1;
-                }
-                else
-                {
-                    return -1;
-                }
+                    var score0 = (int)ScoreOrder(order, input, drones[0]);
+                    var score1 = (int)ScoreOrder(order1, input, drones[0]);
+                    if (score0 == score1)
+                    {
+                        return 0;
+                    }
+                    else if (score0 > score1)
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
             });
             for(int o = 0; o < input.Orders.Length; o++)
             {
@@ -132,6 +134,47 @@ namespace Hashcode.Qualif
           end:
             solution.Builder.Insert(0, nbCommands);
             return solution;
+        }
+
+        private const double FactorAppliedToLoad = 0;
+        public static double ScoreOrder(Order order, Input input, Drone drone)
+        {
+            double score = 0;
+            foreach (var item in order.ItemsWanted)
+            {
+                if (item == -1) // already delivered
+                    continue;
+
+                // find closest warehouse containing the item.
+                WareHouse closestWh = null;
+                int closestWhDist = int.MaxValue;
+                foreach (var wh in input.WareHouses)
+                {
+                    if (wh.Stock[item] > 0) // has item
+                    {
+                        var dist = Helper.Distance(wh.X, wh.Y, drone.X, drone.Y);
+                        if (dist < closestWhDist) // closer !
+                        {
+                            closestWh = wh;
+                            closestWhDist = dist;
+                        }
+                    }
+                }
+
+                if (closestWh == null)
+                {
+                    score = int.MaxValue;
+                    break;
+                }
+
+                // Score is : move to WH, load item, move to order, deliver.
+                // Add load with a multiplicator.
+                var distanceToWh = Helper.Distance(drone.X, drone.Y, closestWh.X, closestWh.Y) + 1;
+                var whToOrder = Helper.Distance(closestWh.X, closestWh.Y, order.X, order.Y) + 1;
+
+                score += distanceToWh + whToOrder + FactorAppliedToLoad * input.ProductTypes[item];
+            }
+            return score;
         }
 	}
 }
