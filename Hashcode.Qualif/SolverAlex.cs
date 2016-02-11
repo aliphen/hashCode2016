@@ -34,6 +34,12 @@ namespace Hashcode.Qualif
             return solution;
         }*/
 
+        /*public static Dictionary<int, Order> ScoreAllOrder(Input input, Drone drone)
+        {
+                    
+        }*/
+
+
         public static Dictionary<int, Order> ScoreAllOrder(Input input, Drone drone)
         {
             var orderScores = new double[input.Orders.Length];
@@ -56,6 +62,9 @@ namespace Hashcode.Qualif
             double score = 0;
             foreach (var item in order.ItemsWanted)
             {
+                if (item == -1) // already delivered
+                    continue;
+                
                 // find closest warehouse containing the item.
                 WareHouse closestWh = null;
                 int closestWhDist = int.MaxValue;
