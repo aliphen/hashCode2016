@@ -16,12 +16,14 @@ namespace Hashcode.Qualif
 
         public void Load(WareHouse wh)
         {
+            turn += Helper.Distance(X, Y, wh.X, wh.Y) + 1;
             X = wh.X;
             Y = wh.Y;
         }
 
         public void Deliver(Order o)
         {
+            turn += Helper.Distance(X, Y, o.X, o.Y) + 1;
             X = o.X;
             Y = o.Y;
         }
