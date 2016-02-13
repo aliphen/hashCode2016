@@ -9,6 +9,8 @@ namespace Hashcode.Qualif
 {
     public static class Helper
     {
+        public static Random Rand = new Random(0);
+
         public static void Assert(Func<bool> test, string message = "")
         {
 #if DEBUG
@@ -21,7 +23,5 @@ namespace Hashcode.Qualif
         {
             return (int) Math.Ceiling(Math.Sqrt(Math.Pow(x1 - x2, 2) + Math.Pow(y1 - y2, 2)));
         }
-
-        
     }
 }

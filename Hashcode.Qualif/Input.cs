@@ -12,14 +12,15 @@ namespace Hashcode.Qualif
         public int[] Stock;
         public int id;
 
-        public bool HasItem(int productId)
+        public bool HasItem(int productId, int count = 1)
         {
-            return Stock[productId] > 0;
+            return productId < 0 || Stock[productId] >= count;
         }
 
+        /// <returns>true if warehouse contains *every* item for given order</returns>
         public bool CanFullfillOrder(Order order)
         {
-            if (order.ItemsWanted.Any(productId => !HasItem(productId)))
+            if (order.ItemsWanted.ToLookup(i => i, i => 1).Select(g => Tuple.Create(g.Key, g.Sum())).Any(t => !HasItem(t.Item1, t.Item2)))
             {
                 return false;
             }

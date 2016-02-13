@@ -8,7 +8,7 @@ namespace Hashcode.Qualif
     {
         public static void Main(string[] args)
         {
-            var inputs = new string[3]
+            var inputs = new[]
             {
                 "../../busy_day.in",
                 "../../mother_of_all_warehouses.in",
