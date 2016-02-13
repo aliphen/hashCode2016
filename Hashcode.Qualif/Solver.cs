@@ -9,9 +9,7 @@ namespace Hashcode.Qualif
     {
         public static Solution Solve(Input input)
         {
-            int nbCommands = 0;
             var solution = new Solution(input);
-            solution.Builder.AppendLine();
 
             var drones = new Drone[input.NbDrones];
             for (int d = 0; d < input.NbDrones; d++)
@@ -49,7 +47,7 @@ namespace Hashcode.Qualif
                     if (chosen.turn > input.NbTurns)
                     {
                         //can't do shit anymore
-                        goto end;
+                        return solution;
                     }
 
                     var sbDeli = new StringBuilder();
@@ -82,7 +80,7 @@ namespace Hashcode.Qualif
                         }
                         wh.Stock[itemType]--;
                         chosen.Load(wh, itemType);
-                        solution.LoadFor(chosen, wh, order, itemType);
+                        solution.LoadForDelivery(chosen, wh, order, itemType);
                         nbDeli++;
                         i++;
                     }
@@ -98,14 +96,11 @@ namespace Hashcode.Qualif
                     }
                     if (enoughTime)
                     {
-                        solution.DoDeliver(chosen);
+                        solution.DoDeliver(chosen, o: order, orderComplete: i == order.ItemsWanted.Length);
                     }
                 }
             }
-
-        end:
-            solution.Builder.Insert(0, nbCommands);
-            return solution;
+            return solution; //we only end up here is all orders are completed
         }
 	}
 

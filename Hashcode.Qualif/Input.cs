@@ -34,6 +34,9 @@ namespace Hashcode.Qualif
         public int NbItems;
         public int[] ItemsWanted; //types of objects
         public int id;
+
+        /// <summary> latest time of delivery to this location </summary>
+        public int DeliveryTime;
     }
 
     /// <summary>
