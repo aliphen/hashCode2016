@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace Hashcode.Qualif
@@ -43,19 +42,11 @@ namespace Hashcode.Qualif
             if (d.turn > o.DeliveryTime)
                 o.DeliveryTime = d.turn;
 
-            _validatedCommands.Append(_deliveryOrders[d.id].ToString());
+            _validatedCommands.Append(_deliveryOrders[d.id]);
             _deliveryOrders[d.id].Clear();
             if (orderComplete)
             {
                 Score += GetScoreForDeliveryOn(o.DeliveryTime-1);
-                
-                //assert we have as many delivery commands for this order as items wanted
-                Helper.Assert(() => _validatedCommands.ToString().Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries).Count(l =>
-                {
-                    //count number of deliveries for given order
-                    var linecontent = l.Split(' ');
-                    return linecontent[1] == "D" && Int32.Parse(linecontent[2]) == o.id;
-                }) == o.NbItems);
             }
         }
 

@@ -19,8 +19,8 @@ namespace Hashcode.Qualif
             
             Array.Sort(input.Orders, (order, order1) =>
             {
-                var totalWeigth1 = order.ItemsWanted.Sum(item => input.ProductTypes[item]);
-                var totalWeigth2 = order1.ItemsWanted.Sum(item => input.ProductTypes[item]);
+                var totalWeigth1 = Math.Max(order.ItemsWanted.Sum(item => input.ProductTypes[item]), input.MaxPayload);
+                var totalWeigth2 = Math.Max(order1.ItemsWanted.Sum(item => input.ProductTypes[item]), input.MaxPayload);
 
                 if (totalWeigth1 == totalWeigth2)
                 {
@@ -50,7 +50,6 @@ namespace Hashcode.Qualif
                         return solution;
                     }
 
-                    var sbDeli = new StringBuilder();
                     var nbDeli = 0;
                     while (i < order.ItemsWanted.Length)
                     {
@@ -61,13 +60,14 @@ namespace Hashcode.Qualif
                         WareHouse wh = null;
                         for (int w = 0; w < input.NbWareHouses; w++)
                         {
-                            var current = input.WareHouses[w];
-                            if (current.Stock[itemType] > 0)
+                            var currentwh = input.WareHouses[w];
+                            if (currentwh.Stock[itemType] > 0)
                             {
-                                if(Helper.Distance(current.X, current.Y, order.X, order.Y) < minDist)
+                                var dist = Helper.Distance(chosen.X, chosen.Y, currentwh.X, currentwh.Y) + Helper.Distance(currentwh.X, currentwh.Y, order.X, order.Y);
+                                if(dist < minDist)
                                 {
-                                    minDist = Helper.Distance(current.X, current.Y, order.X, order.Y);
-                                    wh = current;
+                                    minDist = dist;
+                                    wh = currentwh;
                                 }
                             }
                         }
