@@ -1,20 +1,16 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 
 namespace Hashcode.Qualif
 {
     public class Solver
     {
-        private static int newLineLenght = Environment.NewLine.Length;
-
         public static Solution Solve(Input input)
         {
             int nbCommands = 0;
-            var solution = new Solution();
+            var solution = new Solution(input);
             solution.Builder.AppendLine();
 
             var drones = new Drone[input.NbDrones];
@@ -22,10 +18,8 @@ namespace Hashcode.Qualif
             {
                 drones[d] = new Drone(input, d);
             }
-
-
+            
             Array.Sort(input.Orders, (order, order1) =>
-
             {
                 var totalWeigth1 = order.ItemsWanted.Sum(item => input.ProductTypes[item]);
                 var totalWeigth2 = order1.ItemsWanted.Sum(item => input.ProductTypes[item]);
@@ -38,7 +32,6 @@ namespace Hashcode.Qualif
                 {
                     return totalWeigth1.CompareTo(totalWeigth2);
                 }
-
             });
 
             for (int o = 0; o < input.Orders.Length; o++)
@@ -61,58 +54,36 @@ namespace Hashcode.Qualif
 
                     var sbDeli = new StringBuilder();
                     var nbDeli = 0;
-                    int previtem = -1;
-                    int prevwh = -1;
-                    var currentCount = 1;
                     while (i < order.ItemsWanted.Length)
                     {
                         var itemType = order.ItemsWanted[i];
 
                         //find warehouse with item in stock
-                        int w;
+                        int minDist = Int32.MaxValue;
                         WareHouse wh = null;
-                        var whWithStock = new List<WareHouse>();
-                        for (w = 0; w < input.NbWareHouses; w++)
+                        for (int w = 0; w < input.NbWareHouses; w++)
                         {
-                            wh = input.WareHouses[w];
-                            if (wh.Stock[itemType] > 0)
+                            var current = input.WareHouses[w];
+                            if (current.Stock[itemType] > 0)
                             {
-                                whWithStock.Add(wh);
+                                if(Helper.Distance(current.X, current.Y, order.X, order.Y) < minDist)
+                                {
+                                    minDist = Helper.Distance(current.X, current.Y, order.X, order.Y);
+                                    wh = current;
+                                }
                             }
                         }
 
-
-                        int minDist = Int32.MaxValue;
-                        WareHouse nearestWh = null;
-                        foreach (var ware in whWithStock)
-                        {
-                            if (Helper.Distance(ware.X, ware.Y, order.X, order.Y) < minDist)
-                            {
-                                minDist = Helper.Distance(ware.X, ware.Y, order.X, order.Y);
-                                nearestWh = ware;
-                             }
-                        }
-       
-                        wh = nearestWh;
-                        w = nearestWh.id;
-
-                        var load = String.Format("{0} L {1} {2} {3}", chosen.id, w, itemType, 1);
                         if (!chosen.CheckLoad(wh, itemType))
                         {
-                            //drone passed end of turns
+                            //drone passed end of turns or is full
                             i--; //treat object again
                             break;
                         }
                         wh.Stock[itemType]--;
                         chosen.Load(wh, itemType);
-                                                nbCommands++;
-                                                solution.Builder.AppendLine(load);
-
-                        var deli = String.Format("{0} D {1} {2} {3}", chosen.id, order.id, itemType, 1);
+                        solution.LoadFor(chosen, wh, order, itemType);
                         nbDeli++;
-                                                sbDeli.AppendLine(deli);
-
-
                         i++;
                     }
 
@@ -127,8 +98,7 @@ namespace Hashcode.Qualif
                     }
                     if (enoughTime)
                     {
-                        solution.Builder.Append(sbDeli.ToString());
-                        nbCommands += nbDeli;
+                        solution.DoDeliver(chosen);
                     }
                 }
             }
@@ -136,48 +106,6 @@ namespace Hashcode.Qualif
         end:
             solution.Builder.Insert(0, nbCommands);
             return solution;
-        }
-
-
-        private const double FactorAppliedToLoad = 0;
-        public static double ScoreOrder(Order order, Input input, Drone drone)
-        {
-            double score = 0;
-            foreach (var item in order.ItemsWanted)
-            {
-                if (item == -1) // already delivered
-                    continue;
-
-                // find closest warehouse containing the item.
-                WareHouse closestWh = null;
-                int closestWhDist = int.MaxValue;
-                foreach (var wh in input.WareHouses)
-                {
-                    if (wh.Stock[item] > 0) // has item
-                    {
-                        var dist = Helper.Distance(wh.X, wh.Y, drone.X, drone.Y);
-                        if (dist < closestWhDist) // closer !
-                        {
-                            closestWh = wh;
-                            closestWhDist = dist;
-                        }
-                    }
-                }
-
-                if (closestWh == null)
-                {
-                    score = int.MaxValue;
-                    break;
-                }
-
-                // Score is : move to WH, load item, move to order, deliver.
-                // Add load with a multiplicator.
-                var distanceToWh = Helper.Distance(drone.X, drone.Y, closestWh.X, closestWh.Y) + 1;
-                var whToOrder = Helper.Distance(closestWh.X, closestWh.Y, order.X, order.Y) + 1;
-
-                score += distanceToWh + whToOrder + FactorAppliedToLoad * input.ProductTypes[item];
-            }
-            return score;
         }
 	}
 

@@ -38,7 +38,6 @@ namespace Hashcode.Qualif
 
                 var nbOrders = Int32.Parse(reader.ReadLine());
                 input.Orders = new Order[nbOrders];
-                input.OrderIdToOrder = new Dictionary<int, Order>(nbOrders);
                 for(int i = 0; i < nbOrders; i++)
                 {
                     var coords = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
@@ -50,7 +49,6 @@ namespace Hashcode.Qualif
                         ItemsWanted = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray(),
                     };
                     Array.Sort(input.Orders[i].ItemsWanted);
-                    input.OrderIdToOrder.Add(i, input.Orders[i]);
                 }
             }
             return input;

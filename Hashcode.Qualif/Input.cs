@@ -34,7 +34,6 @@ namespace Hashcode.Qualif
         public int NbItems;
         public int[] ItemsWanted; //types of objects
         public int id;
-
     }
 
     /// <summary>
@@ -54,8 +53,6 @@ namespace Hashcode.Qualif
 
         public WareHouse[] WareHouses;
         public Order[] Orders;
-
-        public Dictionary<int, Order> OrderIdToOrder;
 	}
 }
 
