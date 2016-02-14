@@ -20,24 +20,23 @@ namespace Hashcode.Qualif
             Y = input.WareHouses[0].Y;
         }
 
+        public void Move(WareHouse wh)
+        {
+            turn += Helper.Distance(X, Y, wh.X, wh.Y);
+            X = wh.X;
+            Y = wh.Y;
+        }
+
         public bool CheckLoad(WareHouse wh, int itemType)
         {
-            var tmpturn = turn + Helper.Distance(X, Y, wh.X, wh.Y) + 1;
-            if (tmpturn > input.NbTurns)
-            {
-                turn++; //send it to the future
-                return false;
-            }
-
             var tmppayload = payload + input.ProductTypes[itemType];
             return tmppayload < input.MaxPayload;
         }
 
         public bool Load(WareHouse wh, int itemType)
         {
-            turn += Helper.Distance(X, Y, wh.X, wh.Y) + 1;
-            X = wh.X;
-            Y = wh.Y;
+            Move(wh);
+            turn++;
             payload += input.ProductTypes[itemType];
 
             return turn <= input.NbTurns;

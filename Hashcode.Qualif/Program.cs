@@ -10,7 +10,7 @@ namespace Hashcode.Qualif
         public static void Main(string[] args)
         {
             var fileName = "../../mother_of_all_warehouses.in";
-            var score = 74500;
+            var score = 74964;
 
             //while (true)
             {

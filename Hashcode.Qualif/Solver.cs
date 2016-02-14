@@ -31,78 +31,51 @@ namespace Hashcode.Qualif
                 }
 
                 //choose order
-                WareHouse wh;
-                var order = GetBestOrder(chosen, input, out wh);
+                var order = GetBestOrder(input);
                 if (order == null)
                 {
                     return solution; //no more order to deliver
                 }
 
-                if (wh != null)
+                var wh = input.WareHouses[0];
+                var loadedToDeliver = new List<int>();
+
+                for (int i = 0; i < order.ItemsWanted.Length; i++)
                 {
-                    //go to warehouse and load everything
-                    for (int i = 0; i < order.ItemsWanted.Length; i++)
+                    var itemType = order.ItemsWanted[i];
+                    if (itemType < 0) //already delivered
+                        continue;
+
+                    if (!chosen.CheckLoad(wh, itemType))
                     {
-                        var itemType = order.ItemsWanted[i];
-                        if(itemType < 0)
-                            continue;
-                        
-                        wh.Stock[itemType]--;
-                        Helper.Assert(() => wh.Stock[itemType] >= 0);
-                        chosen.Load(wh, itemType);
-                        solution.LoadForDelivery(chosen, wh, order, itemType);
+                        //not enough space to carry this item
+                        continue;
                     }
-                    //everything is loaded
-                    for (int dd = 0; dd < order.NbItemsRemaining; dd++)
-                    {
-                        chosen.Deliver(order);
-                    }
-                    solution.DoDeliver(chosen, order, orderComplete: true);
+                    wh.Stock[itemType]--;
+                    chosen.Load(wh, itemType);
+                    solution.LoadForDelivery(chosen, wh, order, itemType);
+                    loadedToDeliver.Add(i);
+                }
+                for (int i = 0; i < loadedToDeliver.Count; i++)
+                {
+                    chosen.Deliver(order);
+                    Helper.Assert(() => order.ItemsWanted[loadedToDeliver[i]] >= 0);
+
+                    order.TotalWeight -= input.ProductTypes[order.ItemsWanted[loadedToDeliver[i]]];
+                    order.ItemsWanted[loadedToDeliver[i]] = -1; //mark as delivered
+                    order.NbItemsRemaining--;
+                }
+                if (order.NbItemsRemaining == 0)
+                {
                     order.ItemsWanted = null;
                 }
-                else //we'll need several drones
-                {
-                    wh = input.WareHouses[0];
-                    var loadedToDeliver = new List<int>();
-
-                        for (int i = 0; i < order.ItemsWanted.Length; i++)
-                        {
-                            var itemType = order.ItemsWanted[i];
-                            if (itemType < 0) //already delivered
-                                continue;
-                            
-                            if (!chosen.CheckLoad(wh, itemType))
-                            {
-                                //not enough space to carry this item
-                                continue;
-                            }
-                            wh.Stock[itemType]--;
-                            chosen.Load(wh, itemType);
-                            solution.LoadForDelivery(chosen, wh, order, itemType);
-                            loadedToDeliver.Add(i);
-                        
-                    }
-                    for (int dd = 0; dd < loadedToDeliver.Count; dd++)
-                    {
-                        chosen.Deliver(order);
-                    }
-                    for (int i = 0; i < loadedToDeliver.Count; i++)
-                    {
-                        Helper.Assert(() => order.ItemsWanted[loadedToDeliver[i]] >= 0);
-
-                        order.TotalWeight -= input.ProductTypes[order.ItemsWanted[loadedToDeliver[i]]];
-                        order.ItemsWanted[loadedToDeliver[i]] = -1; //mark as delivered
-                        order.NbItemsRemaining--;
-                    }
-                    solution.DoDeliver(chosen, order, false);
-                }
+                solution.DoDeliver(chosen, order, order.NbItemsRemaining == 0);
+                chosen.Move(wh); //send it back to the warehouse
             }
         }
 
-        private static Order GetBestOrder(Drone d, Input input, out WareHouse goThere)
+        private static Order GetBestOrder(Input input)
         {
-            goThere = null;
-
             int bestCost = Int32.MaxValue;
             Order best = null;
             foreach (var order in input.Orders)
@@ -110,35 +83,20 @@ namespace Hashcode.Qualif
                 if(order.ItemsWanted == null)
                     continue; //already delivered
 
-                int cost = Int32.MaxValue;
-                WareHouse bestWh = null;
                 var totalWeight = order.TotalWeight;
-                if (totalWeight < input.MaxPayload) //one drone can take care of this order
+                var wh = input.WareHouses[0];
+                var cost = Helper.Distance(wh.X, wh.Y, order.X, order.Y);
+
+                if (totalWeight >= input.MaxPayload)
                 {
-                    var wh = input.WareHouses[0];
-                    var dist = Helper.Distance(wh.X, wh.Y, order.X, order.Y);
-                    if (dist < cost)
-                    {
-                        cost = dist;
-                        bestWh = wh;
-                    }
+                    cost *= (totalWeight/input.MaxPayload + 1); //apply a malus for estimated nb of drones needed
                 }
-                else //we'll need several drones to complete this order
-                {
-                    var wh = input.WareHouses[0];
-                    var dist = Helper.Distance(wh.X, wh.Y, order.X, order.Y);
-                    dist = dist * (totalWeight / input.MaxPayload + 1); //apply a malus for estimated nb of drones needed
-                    if (dist < cost)
-                    {
-                        cost = dist;
-                    }
-                }
+                //cost += (order.NbItemsRemaining*2); //time to pick and deliver everything
 
                 if (cost < bestCost)
                 {
                     bestCost = cost;
                     best = order;
-                    goThere = bestWh;
                 }
             }
             return best;
