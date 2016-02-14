@@ -44,7 +44,6 @@ namespace Hashcode.Qualif
                 var order = GetBestOrder(chosen, input, out wh);
                 if (order == null)
                 {
-                    Console.WriteLine("everything is delivered !");
                     return solution; //no more order to deliver
                 }
 
@@ -95,29 +94,14 @@ namespace Hashcode.Qualif
                                 }
                             }
                         }
+                        wh = bestwh;
 
                         for (int i = 0; i < availableItems.Count; i++)
                         {
                             var itemType = order.ItemsWanted[availableItems[i]];
                             if (itemType < 0) //already delivered
                                 continue;
-
-                            //find warehouse with item in stock
-                            int minDist = Int32.MaxValue;
-                            for (int w = 0; w < input.NbWareHouses; w++)
-                            {
-                                var currentwh = input.WareHouses[w];
-                                if (currentwh.Stock[itemType] > 0)
-                                {
-                                    var dist = Helper.Distance(chosen.X, chosen.Y, currentwh.X, currentwh.Y) + Helper.Distance(currentwh.X, currentwh.Y, order.X, order.Y);
-                                    if (dist < minDist)
-                                    {
-                                        minDist = dist;
-                                        wh = currentwh;
-                                    }
-                                }
-                            }
-
+                            
                             if (!chosen.CheckLoad(wh, itemType))
                             {
                                 //drone passed end of turns or is full
