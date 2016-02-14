@@ -41,14 +41,16 @@ namespace Hashcode.Qualif
                 for(int i = 0; i < nbOrders; i++)
                 {
                     var coords = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray();
-                    input.Orders[i] = new Order {
+                    var order = new Order {
                         X = coords[0], 
                         Y = coords[1],
                         id = i,
                         NbItemsRemaining = Int32.Parse(reader.ReadLine()),
                         ItemsWanted = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray(),
                     };
-                    Array.Sort(input.Orders[i].ItemsWanted);
+                    order.TotalWeight = order.ItemsWanted.Sum(item => input.ProductTypes[item]);
+                    Array.Sort(order.ItemsWanted);
+                    input.Orders[i] = order;
                 }
             }
             return input;

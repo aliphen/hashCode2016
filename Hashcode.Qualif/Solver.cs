@@ -139,6 +139,7 @@ namespace Hashcode.Qualif
                     {
                         Helper.Assert(() => order.ItemsWanted[loadedToDeliver[i]] >= 0);
 
+                        order.TotalWeight -= input.ProductTypes[order.ItemsWanted[loadedToDeliver[i]]];
                         order.ItemsWanted[loadedToDeliver[i]] = -1; //mark as delivered
                         order.NbItemsRemaining--;
                     }
@@ -170,7 +171,7 @@ namespace Hashcode.Qualif
 
                 int cost = Int32.MaxValue;
                 WareHouse bestWh = null;
-                var totalWeight = order.ItemsWanted.Sum(item => item >= 0 ? input.ProductTypes[item] : 0);
+                var totalWeight = order.TotalWeight;
                 if (totalWeight < input.MaxPayload) //one drone can take care of this order
                 {
                     var eligibleWareHouses = input.WareHouses.Where(wh => wh.CanFullfillOrder(order.ItemsWanted) == order.NbItemsRemaining);

@@ -49,9 +49,21 @@ namespace Hashcode.Qualif
         public int NbItemsRemaining;
         public int[] ItemsWanted; //types of objects
         public int id;
-
+        
         /// <summary> latest time of delivery to this location </summary>
         public int DeliveryTime;
+
+        public int TotalWeight;
+
+        public void DeliverItem(int index)
+        {
+            throw new NotImplementedException();
+            Helper.Assert(() => ItemsWanted[index] >= 0);
+            ItemsWanted[index] = -1;
+            NbItemsRemaining--;
+            Helper.Assert(() => NbItemsRemaining >= 0);
+
+        }
     }
 
     /// <summary>
