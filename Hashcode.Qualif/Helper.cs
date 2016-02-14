@@ -9,7 +9,7 @@ namespace Hashcode.Qualif
 {
     public static class Helper
     {
-        public static Random Rand = new Random(0);
+        public static Random Rand = new Random();
 
         public static void Assert(Func<bool> test, string message = "")
         {

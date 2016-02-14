@@ -7,8 +7,12 @@ namespace Hashcode.Qualif
 {
     public class Solver
     {
+        private static double _multidroneMalus;
+
         public static Solution Solve(Input input)
         {
+            _multidroneMalus = 1.0 + Helper.Rand.NextDouble(); //choose a random malus between 1 and 2 for this run
+
             var solution = new Solution(input);
 
             var drones = new Drone[input.NbDrones];
@@ -232,7 +236,7 @@ namespace Hashcode.Qualif
                     var wh3 = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
                     dist += Helper.Distance(wh2.X, wh2.Y, wh3.X, wh3.Y);
                     dist += Helper.Distance(order.X, order.Y, wh3.X, wh3.Y);
-                    dist = (int)(dist * (double) totalWeight/input.MaxPayload) * 2; //apply a malus for estimated nb of drones needed
+                    dist = (int)(_multidroneMalus * dist * totalWeight/input.MaxPayload); //apply a malus for estimated nb of drones needed
                     if (dist < cost)
                     {
                         cost = dist;
