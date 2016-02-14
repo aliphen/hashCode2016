@@ -65,7 +65,7 @@ namespace Hashcode.Qualif
                     }
                     //everything is loaded
                     bool enoughTime = true;
-                    for (int dd = 0; dd < order.NbItems; dd++)
+                    for (int dd = 0; dd < order.NbItemsRemaining; dd++)
                     {
                         if (!chosen.Deliver(order))
                         {
@@ -79,43 +79,69 @@ namespace Hashcode.Qualif
                         order.ItemsWanted = null;
                     }
                 }
-                else //we'll have to go to several warehouses to load stuff
+                else //we'll have to go to several warehouses to load stuff OR we'll need several drones
                 {
-                    var nbDeli = 0;
-                    for (int i = 0; i < order.ItemsWanted.Length; i++)
+                    var loadedToDeliver = new List<int>();
+                    var itemsToDeliver = (int[]) order.ItemsWanted.Clone();
+                    while(itemsToDeliver.Any(it => it >= 0))
                     {
-                        var itemType = order.ItemsWanted[i];
-                        if (itemType < 0) //already delivered
-                            continue;
-
-                        //find warehouse with item in stock
-                        int minDist = Int32.MaxValue;
+                        //best warehouse with item in stock
+                        double bestScore = Double.PositiveInfinity;
+                        WareHouse bestwh = null;
+                        List<int> availableItems = null;
                         for (int w = 0; w < input.NbWareHouses; w++)
                         {
                             var currentwh = input.WareHouses[w];
-                            if (currentwh.Stock[itemType] > 0)
+                            var items = currentwh.GetFulfillable(itemsToDeliver);
+                            if (items.Count > 0)
                             {
-                                var dist = Helper.Distance(chosen.X, chosen.Y, currentwh.X, currentwh.Y) + Helper.Distance(currentwh.X, currentwh.Y, order.X, order.Y);
-                                if (dist < minDist)
+                                var score = (double) Helper.Distance(chosen.X, chosen.Y, currentwh.X, currentwh.Y)/items.Count; //time per item
+                                if (score < bestScore)
                                 {
-                                    minDist = dist;
-                                    wh = currentwh;
+                                    bestScore = score;
+                                    bestwh = currentwh;
+                                    availableItems = items;
                                 }
                             }
                         }
 
-                        if (!chosen.CheckLoad(wh, itemType))
+                        for (int i = 0; i < availableItems.Count; i++)
                         {
-                            //drone passed end of turns or is full
-                            break;
+                            var itemType = order.ItemsWanted[availableItems[i]];
+                            if (itemType < 0) //already delivered
+                                continue;
+
+                            //find warehouse with item in stock
+                            int minDist = Int32.MaxValue;
+                            for (int w = 0; w < input.NbWareHouses; w++)
+                            {
+                                var currentwh = input.WareHouses[w];
+                                if (currentwh.Stock[itemType] > 0)
+                                {
+                                    var dist = Helper.Distance(chosen.X, chosen.Y, currentwh.X, currentwh.Y) + Helper.Distance(currentwh.X, currentwh.Y, order.X, order.Y);
+                                    if (dist < minDist)
+                                    {
+                                        minDist = dist;
+                                        wh = currentwh;
+                                    }
+                                }
+                            }
+
+                            if (!chosen.CheckLoad(wh, itemType))
+                            {
+                                //drone passed end of turns or is full
+                                goto deliver; //maybe we could stash one or two more small items, but whatever
+                            }
+                            wh.Stock[itemType]--;
+                            itemsToDeliver[availableItems[i]] = -1;
+                            chosen.Load(wh, itemType);
+                            solution.LoadForDelivery(chosen, wh, order, itemType);
+                            loadedToDeliver.Add(availableItems[i]);
                         }
-                        wh.Stock[itemType]--;
-                        chosen.Load(wh, itemType);
-                        solution.LoadForDelivery(chosen, wh, order, itemType);
-                        nbDeli++;
                     }
+                deliver:
                     bool enoughTime = true;
-                    for (int dd = 0; dd < nbDeli; dd++)
+                    for (int dd = 0; dd < loadedToDeliver.Count; dd++)
                     {
                         if (!chosen.Deliver(order))
                         {
@@ -126,15 +152,14 @@ namespace Hashcode.Qualif
                     if (enoughTime)
                     {
                         int i;
-                        for (i = 0; nbDeli > 0; i++)
+                        for (i = 0; i < loadedToDeliver.Count; i++)
                         {
-                            if (order.ItemsWanted[i] >= 0)
-                            {
-                                order.ItemsWanted[i] = -1; //mark as delivered
-                                nbDeli--;
-                            }
+                            Helper.Assert(() => order.ItemsWanted[loadedToDeliver[i]] >= 0);
+
+                            order.ItemsWanted[loadedToDeliver[i]] = -1; //mark as delivered
+                            order.NbItemsRemaining--;
                         }
-                        var orderComplete = i == order.ItemsWanted.Length;
+                        var orderComplete = order.NbItemsRemaining == 0;
                         if (orderComplete)
                         {
                             Helper.Assert(() => order.ItemsWanted.All(it => it < 0));

@@ -45,7 +45,7 @@ namespace Hashcode.Qualif
                         X = coords[0], 
                         Y = coords[1],
                         id = i,
-                        NbItems = Int32.Parse(reader.ReadLine()),
+                        NbItemsRemaining = Int32.Parse(reader.ReadLine()),
                         ItemsWanted = reader.ReadLine().Split(' ').Select(Int32.Parse).ToArray(),
                     };
                     Array.Sort(input.Orders[i].ItemsWanted);

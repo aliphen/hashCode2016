@@ -46,7 +46,7 @@ namespace Hashcode.Qualif
     {
         public int X;
         public int Y;
-        public int NbItems;
+        public int NbItemsRemaining;
         public int[] ItemsWanted; //types of objects
         public int id;
 
