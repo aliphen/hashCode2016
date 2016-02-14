@@ -1,6 +1,6 @@
 using System;
+using System.Collections;
 using System.Linq;
-using System.Text;
 using System.Collections.Generic;
 
 namespace Hashcode.Qualif
@@ -31,15 +31,18 @@ namespace Hashcode.Qualif
                 }
                 if (chosen.turn > input.NbTurns)
                 {
-                    //can't do shit anymore
-                    return solution;
+                    Console.WriteLine("end of times reached");
+                    return solution; //can't do shit anymore
                 }
 
                 //choose order
                 WareHouse wh;
                 var order = GetBestOrder(chosen, input, out wh);
-                if(order == null)
-                    return solution; //no more order to deliver ?
+                if (order == null)
+                {
+                    Console.WriteLine("everything is delivered !");
+                    return solution; //no more order to deliver
+                }
 
                 if (wh != null)
                 {
@@ -133,7 +136,14 @@ namespace Hashcode.Qualif
                         }
                         var orderComplete = i == order.ItemsWanted.Length;
                         if (orderComplete)
+                        {
+                            Helper.Assert(() => order.ItemsWanted.All(it => it < 0));
                             order.ItemsWanted = null;
+                        }
+                        else
+                        {
+                            Helper.Assert(() => order.ItemsWanted.Any(it => it >= 0));
+                        }
                         solution.DoDeliver(chosen, order, orderComplete);
                     }
                 }
@@ -156,7 +166,7 @@ namespace Hashcode.Qualif
                 var totalWeight = order.ItemsWanted.Sum(item => item >= 0 ? input.ProductTypes[item] : 0);
                 if (totalWeight < input.MaxPayload) //one drone can take care of this order
                 {
-                    var eligibleWareHouses = input.WareHouses.Where(wh => wh.CanFullfillOrder(order));
+                    var eligibleWareHouses = input.WareHouses.Where(wh => wh.CanFullfillOrder(order.ItemsWanted) == order.NbItemsRemaining);
                     if (eligibleWareHouses.Any()) //everything is in the same warehouse
                     {
                         foreach (var wh in eligibleWareHouses)

@@ -12,19 +12,33 @@ namespace Hashcode.Qualif
         public int[] Stock;
         public int id;
 
-        public bool HasItem(int productId, int count = 1)
+        public int HasItem(int productId, int count = 1)
         {
-            return productId < 0 || Stock[productId] >= count;
+            if (productId < 0)
+                return 0;
+            return Math.Min(Stock[productId], count);
         }
 
-        /// <returns>true if warehouse contains *every* item for given order</returns>
-        public bool CanFullfillOrder(Order order)
+        /// <returns> true if warehouse contains *every* item for given order </returns>
+        public int CanFullfillOrder(int[] items)
         {
-            if (order.ItemsWanted.ToLookup(i => i, i => 1).Select(g => Tuple.Create(g.Key, g.Sum())).Any(t => !HasItem(t.Item1, t.Item2)))
+            return items
+                .ToLookup(i => i, i => 1)
+                .Select(g => Tuple.Create(g.Key, g.Sum()))
+                .Sum(t => HasItem(t.Item1, t.Item2));
+        }
+
+        /// <summary> set items that are in stock to -1 in given array </summary>
+        /// <returns> the indexes of the stuff to load </returns>
+        public List<int> GetFulfillable(int[] items)
+        {
+            var canDo = new List<int>();
+            for (int i = 0; i < items.Length; i++)
             {
-                return false;
+                if (HasItem(items[i]) > 0)
+                    canDo.Add(i);
             }
-            return true;
+            return canDo;
         }
     }
 
