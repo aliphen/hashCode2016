@@ -56,32 +56,19 @@ namespace Hashcode.Qualif
                         var itemType = order.ItemsWanted[i];
                         if(itemType < 0)
                             continue;
-
-                        if (!chosen.CheckLoad(wh, itemType))
-                        {
-                            //drone passed end of turns :(
-                            break;
-                        }
+                        
                         wh.Stock[itemType]--;
                         Helper.Assert(() => wh.Stock[itemType] >= 0);
                         chosen.Load(wh, itemType);
                         solution.LoadForDelivery(chosen, wh, order, itemType);
                     }
                     //everything is loaded
-                    bool enoughTime = true;
                     for (int dd = 0; dd < order.NbItemsRemaining; dd++)
                     {
-                        if (!chosen.Deliver(order))
-                        {
-                            //drone passed end of turns
-                            enoughTime = false;
-                        }
+                        chosen.Deliver(order);
                     }
-                    if (enoughTime)
-                    {
-                        solution.DoDeliver(chosen, order, orderComplete: true);
-                        order.ItemsWanted = null;
-                    }
+                    solution.DoDeliver(chosen, order, orderComplete: true);
+                    order.ItemsWanted = null;
                 }
                 else //we'll have to go to several warehouses to load stuff OR we'll need several drones
                 {
@@ -144,37 +131,28 @@ namespace Hashcode.Qualif
                         }
                     }
                 deliver:
-                    bool enoughTime = true;
                     for (int dd = 0; dd < loadedToDeliver.Count; dd++)
                     {
-                        if (!chosen.Deliver(order))
-                        {
-                            //drone passed end of turns
-                            enoughTime = false;
-                        }
+                        chosen.Deliver(order);
                     }
-                    if (enoughTime)
+                    for (int i = 0; i < loadedToDeliver.Count; i++)
                     {
-                        int i;
-                        for (i = 0; i < loadedToDeliver.Count; i++)
-                        {
-                            Helper.Assert(() => order.ItemsWanted[loadedToDeliver[i]] >= 0);
+                        Helper.Assert(() => order.ItemsWanted[loadedToDeliver[i]] >= 0);
 
-                            order.ItemsWanted[loadedToDeliver[i]] = -1; //mark as delivered
-                            order.NbItemsRemaining--;
-                        }
-                        var orderComplete = order.NbItemsRemaining == 0;
-                        if (orderComplete)
-                        {
-                            Helper.Assert(() => order.ItemsWanted.All(it => it < 0));
-                            order.ItemsWanted = null;
-                        }
-                        else
-                        {
-                            Helper.Assert(() => order.ItemsWanted.Any(it => it >= 0));
-                        }
-                        solution.DoDeliver(chosen, order, orderComplete);
+                        order.ItemsWanted[loadedToDeliver[i]] = -1; //mark as delivered
+                        order.NbItemsRemaining--;
                     }
+                    var orderComplete = order.NbItemsRemaining == 0;
+                    if (orderComplete)
+                    {
+                        Helper.Assert(() => order.ItemsWanted.All(it => it < 0));
+                        order.ItemsWanted = null;
+                    }
+                    else
+                    {
+                        Helper.Assert(() => order.ItemsWanted.Any(it => it >= 0));
+                    }
+                    solution.DoDeliver(chosen, order, orderComplete);
                 }
             }
         }
@@ -212,13 +190,9 @@ namespace Hashcode.Qualif
                     {
                         //simulate going to 3 different wh
                         int dist = 0;
-                        var wh1 = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
-                        dist += Helper.Distance(d.X, d.Y, wh1.X, wh1.Y);
-                        var wh2 = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
-                        dist += Helper.Distance(wh2.X, wh2.Y, wh1.X, wh1.Y);
-                        var wh3 = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
-                        dist += Helper.Distance(wh2.X, wh2.Y, wh3.X, wh3.Y);
-                        dist += Helper.Distance(order.X, order.Y, wh3.X, wh3.Y);
+                        var wh = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
+                        dist += Helper.Distance(d.X, d.Y, wh.X, wh.Y) * 3;
+                        dist += Helper.Distance(order.X, order.Y, wh.X, wh.Y);
                         if (dist < cost)
                         {
                             cost = dist;
@@ -229,13 +203,9 @@ namespace Hashcode.Qualif
                 {
                     //simulate going to 3 different wh
                     int dist = 0;
-                    var wh1 = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
-                    dist += Helper.Distance(d.X, d.Y, wh1.X, wh1.Y);
-                    var wh2 = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
-                    dist += Helper.Distance(wh2.X, wh2.Y, wh1.X, wh1.Y);
-                    var wh3 = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
-                    dist += Helper.Distance(wh2.X, wh2.Y, wh3.X, wh3.Y);
-                    dist += Helper.Distance(order.X, order.Y, wh3.X, wh3.Y);
+                    var wh = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
+                    dist += Helper.Distance(d.X, d.Y, wh.X, wh.Y)*3;
+                    dist += Helper.Distance(order.X, order.Y, wh.X, wh.Y);
                     dist = (int)(_multidroneMalus * dist * totalWeight/input.MaxPayload); //apply a malus for estimated nb of drones needed
                     if (dist < cost)
                     {
