@@ -174,40 +174,19 @@ namespace Hashcode.Qualif
                 var totalWeight = order.TotalWeight;
                 if (totalWeight < input.MaxPayload) //one drone can take care of this order
                 {
-                    var eligibleWareHouses = input.WareHouses.Where(wh => wh.CanFullfillOrder(order.ItemsWanted) == order.NbItemsRemaining);
-                    if (eligibleWareHouses.Any()) //everything is in the same warehouse
+                    var wh = input.WareHouses[0];
+                    var dist = Helper.Distance(wh.X, wh.Y, order.X, order.Y);
+                    if (dist < cost)
                     {
-                        foreach (var wh in eligibleWareHouses)
-                        {
-                            var dist = Helper.Distance(d.X, d.Y, wh.X, wh.Y) + Helper.Distance(wh.X, wh.Y, order.X, order.Y);
-                            if (dist < cost)
-                            {
-                                cost = dist;
-                                bestWh = wh;
-                            }
-                        }
-                    }
-                    else //one drone can do everything, but has to go to several warehouses
-                    {
-                        //simulate going to 3 different wh
-                        int dist = 0;
-                        var wh = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
-                        dist += Helper.Distance(d.X, d.Y, wh.X, wh.Y) * 3;
-                        dist += Helper.Distance(order.X, order.Y, wh.X, wh.Y);
-                        if (dist < cost)
-                        {
-                            cost = dist;
-                        }
+                        cost = dist;
+                        bestWh = wh;
                     }
                 }
                 else //we'll need several drones to complete this order
                 {
-                    //simulate going to 3 different wh
-                    int dist = 0;
-                    var wh = input.WareHouses[Helper.Rand.Next(input.NbWareHouses)];
-                    dist += Helper.Distance(d.X, d.Y, wh.X, wh.Y)*3;
-                    dist += Helper.Distance(order.X, order.Y, wh.X, wh.Y);
-                    dist = (int)(_multidroneMalus * dist * totalWeight/input.MaxPayload); //apply a malus for estimated nb of drones needed
+                    var wh = input.WareHouses[0];
+                    var dist = Helper.Distance(wh.X, wh.Y, order.X, order.Y);
+                    dist = (dist * (totalWeight / input.MaxPayload + 1)); //apply a malus for estimated nb of drones needed
                     if (dist < cost)
                     {
                         cost = dist;
