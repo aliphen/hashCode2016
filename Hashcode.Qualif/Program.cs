@@ -9,37 +9,27 @@ namespace Hashcode.Qualif
     {
         public static void Main(string[] args)
         {
-            var inputs = new[]
-            {
-                "../../busy_day.in",
-                "../../mother_of_all_warehouses.in",
-                "../../redundancy.in"
-            };
-            var scores = new[] {105068, 74500, 96138};
+            var fileName = "../../mother_of_all_warehouses.in";
+            var score = 74500;
 
             //while (true)
             {
-                for (int i = 0; i < inputs.Length; i++)
+                Console.WriteLine("Solving for input file {0}", fileName);
+                var input = Parser.Parse(fileName);
+
+                var sw = Stopwatch.StartNew();
+                var solution = Solver.Solve(input);
+                Console.WriteLine(solution.Score + " - " + sw.ElapsedMilliseconds + "ms");
+
+                //write output file if better than before
+                if (solution.Score > score)
                 {
-                    var fileName = inputs[i];
-                    Console.WriteLine("Solving for input file {0}", fileName);
-                    var input = Parser.Parse(fileName);
-
-                    var sw = Stopwatch.StartNew();
-                    var solution = Solver.Solve(input);
-                    Console.WriteLine("Done, " + sw.ElapsedMilliseconds + "ms elapsed");
-
-                    //write output file if better than before
-                    if (solution.Score > scores[i])
+                    var outputFile = Path.GetFileNameWithoutExtension(fileName) + "-" + solution.Score + ".out";
+                    using (var writer = new StreamWriter("../../" + outputFile))
                     {
-                        scores[i] = solution.Score;
-                        var outputFile = Path.GetFileNameWithoutExtension(fileName) + "-" + solution.Score + ".out";
-                        using (var writer = new StreamWriter("../../" + outputFile))
-                        {
-                            writer.Write(solution);
-                        }
-                        Console.WriteLine("file dumped : " + outputFile);
+                        writer.Write(solution);
                     }
+                    Console.WriteLine("[dumped]");
                 }
             }
         }

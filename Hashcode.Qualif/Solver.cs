@@ -7,12 +7,8 @@ namespace Hashcode.Qualif
 {
     public class Solver
     {
-        private static double _multidroneMalus;
-
         public static Solution Solve(Input input)
         {
-            _multidroneMalus = 1.0 + Helper.Rand.NextDouble(); //choose a random malus between 1 and 2 for this run
-
             var solution = new Solution(input);
 
             var drones = new Drone[input.NbDrones];
@@ -33,18 +29,12 @@ namespace Hashcode.Qualif
                     if (drones[d].turn < chosen.turn)
                         chosen = drones[d];
                 }
-                if (chosen.turn > input.NbTurns)
-                {
-                    Console.WriteLine("end of times reached");
-                    return solution; //can't do shit anymore
-                }
 
                 //choose order
                 WareHouse wh;
                 var order = GetBestOrder(chosen, input, out wh);
                 if (order == null)
                 {
-                    Console.WriteLine("everything is delivered !");
                     return solution; //no more order to deliver
                 }
 
@@ -70,67 +60,28 @@ namespace Hashcode.Qualif
                     solution.DoDeliver(chosen, order, orderComplete: true);
                     order.ItemsWanted = null;
                 }
-                else //we'll have to go to several warehouses to load stuff OR we'll need several drones
+                else //we'll need several drones
                 {
+                    wh = input.WareHouses[0];
                     var loadedToDeliver = new List<int>();
-                    var itemsToDeliver = (int[]) order.ItemsWanted.Clone();
-                    while(itemsToDeliver.Any(it => it >= 0))
-                    {
-                        //best warehouse with item in stock
-                        double bestScore = Double.PositiveInfinity;
-                        WareHouse bestwh = null;
-                        List<int> availableItems = null;
-                        for (int w = 0; w < input.NbWareHouses; w++)
-                        {
-                            var currentwh = input.WareHouses[w];
-                            var items = currentwh.GetFulfillable(itemsToDeliver);
-                            if (items.Count > 0)
-                            {
-                                var score = (double) Helper.Distance(chosen.X, chosen.Y, currentwh.X, currentwh.Y)/items.Count; //time per item
-                                if (score < bestScore)
-                                {
-                                    bestScore = score;
-                                    bestwh = currentwh;
-                                    availableItems = items;
-                                }
-                            }
-                        }
 
-                        for (int i = 0; i < availableItems.Count; i++)
+                        for (int i = 0; i < order.ItemsWanted.Length; i++)
                         {
-                            var itemType = order.ItemsWanted[availableItems[i]];
+                            var itemType = order.ItemsWanted[i];
                             if (itemType < 0) //already delivered
                                 continue;
-
-                            //find warehouse with item in stock
-                            int minDist = Int32.MaxValue;
-                            for (int w = 0; w < input.NbWareHouses; w++)
-                            {
-                                var currentwh = input.WareHouses[w];
-                                if (currentwh.Stock[itemType] > 0)
-                                {
-                                    var dist = Helper.Distance(chosen.X, chosen.Y, currentwh.X, currentwh.Y) + Helper.Distance(currentwh.X, currentwh.Y, order.X, order.Y);
-                                    if (dist < minDist)
-                                    {
-                                        minDist = dist;
-                                        wh = currentwh;
-                                    }
-                                }
-                            }
-
+                            
                             if (!chosen.CheckLoad(wh, itemType))
                             {
-                                //drone passed end of turns or is full
-                                goto deliver; //maybe we could stash one or two more small items, but whatever
+                                //not enough space to carry this item
+                                continue;
                             }
                             wh.Stock[itemType]--;
-                            itemsToDeliver[availableItems[i]] = -1;
                             chosen.Load(wh, itemType);
                             solution.LoadForDelivery(chosen, wh, order, itemType);
-                            loadedToDeliver.Add(availableItems[i]);
-                        }
+                            loadedToDeliver.Add(i);
+                        
                     }
-                deliver:
                     for (int dd = 0; dd < loadedToDeliver.Count; dd++)
                     {
                         chosen.Deliver(order);
@@ -143,17 +94,7 @@ namespace Hashcode.Qualif
                         order.ItemsWanted[loadedToDeliver[i]] = -1; //mark as delivered
                         order.NbItemsRemaining--;
                     }
-                    var orderComplete = order.NbItemsRemaining == 0;
-                    if (orderComplete)
-                    {
-                        Helper.Assert(() => order.ItemsWanted.All(it => it < 0));
-                        order.ItemsWanted = null;
-                    }
-                    else
-                    {
-                        Helper.Assert(() => order.ItemsWanted.Any(it => it >= 0));
-                    }
-                    solution.DoDeliver(chosen, order, orderComplete);
+                    solution.DoDeliver(chosen, order, false);
                 }
             }
         }
@@ -186,7 +127,7 @@ namespace Hashcode.Qualif
                 {
                     var wh = input.WareHouses[0];
                     var dist = Helper.Distance(wh.X, wh.Y, order.X, order.Y);
-                    dist = (dist * (totalWeight / input.MaxPayload + 1)); //apply a malus for estimated nb of drones needed
+                    dist = dist * (totalWeight / input.MaxPayload + 1); //apply a malus for estimated nb of drones needed
                     if (dist < cost)
                     {
                         cost = dist;
