@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Policy;
-using NUnit.Framework;
+﻿using System.Collections.Generic;
 
 namespace Hashcode.Qualif
 {
     public class Coords
     {
         public const int NinetyDegrees = 324000;
-        public const int OneEightyDegrees = 2*NinetyDegrees;
-        public const int ThreeSixtyDegrees = 4*NinetyDegrees;
+        public const int OneEightyDegrees = 2 * NinetyDegrees;
+        public const int ThreeSixtyDegrees = 4 * NinetyDegrees;
 
         /// <summary> aka φ </summary>
         public int Lat;
@@ -30,7 +25,7 @@ namespace Hashcode.Qualif
 
         public Satellite(int lat, int lon, int speed, int rotSpeed, int maxRot)
         {
-            Pos = new Coords {Lat = lat, Lon = lon};
+            Pos = new Coords { Lat = lat, Lon = lon };
             Speed = speed;
             RotSpeed = rotSpeed;
             MaxRot = maxRot;
@@ -38,8 +33,8 @@ namespace Hashcode.Qualif
 
         public void Move(int nbTurns)
         {
-            Pos.Lat += Speed*nbTurns;
-            Pos.Lon += Input.EarthRotationSpeed*nbTurns;
+            Pos.Lat += Speed * nbTurns;
+            Pos.Lon += Input.EarthRotationSpeed * nbTurns;
 
             while (true)
             {
@@ -61,7 +56,7 @@ namespace Hashcode.Qualif
 
             //adjust longitude
             Pos.Lon += Coords.OneEightyDegrees; //put it in 0-360 range
-            Pos.Lon = Pos.Lon%Coords.ThreeSixtyDegrees;
+            Pos.Lon = Pos.Lon % Coords.ThreeSixtyDegrees;
             if (Pos.Lon < 0)
                 Pos.Lon += Coords.ThreeSixtyDegrees;
             Pos.Lon -= Coords.OneEightyDegrees; //put it back in game coords (-180 - 180)
@@ -97,7 +92,7 @@ namespace Hashcode.Qualif
     /// <summary>
     /// contains an object representation of the input
     /// </summary>
-	public class Input
+    public class Input
     {
         public const int EarthRotationSpeed = -15;
 
