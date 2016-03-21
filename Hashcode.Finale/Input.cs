@@ -61,6 +61,8 @@ namespace Hashcode.Qualif
     /// </summary>
 	public class Input
     {
+        public const int EarthRotationSpeed = -15;
+
         public int NbTurns;
         public readonly List<Satellite> Satellites = new List<Satellite>();
         public readonly List<PicCollection> Collections = new List<PicCollection>();
