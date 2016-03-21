@@ -17,5 +17,6 @@ namespace Hashcode.Qualif
             Assert.AreEqual(expectedLon, satellite.Pos.Lon);
         }
 
+
     }
 }

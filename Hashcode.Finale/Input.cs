@@ -12,6 +12,22 @@ namespace Hashcode.Qualif
         public int Lat;
         /// <summary> aka λ </summary>
         public int Lon;
+
+        public Coords()
+        {
+
+        }
+
+        public Coords(int lat, int lon)
+        {
+            Lat = lat;
+            Lon = lon;
+        }
+
+        public Coords(Coords c) : this(c.Lat, c.Lon)
+        {
+        }
+
     }
 
     public class Satellite
@@ -29,6 +45,12 @@ namespace Hashcode.Qualif
             Speed = speed;
             RotSpeed = rotSpeed;
             MaxRot = maxRot;
+        }
+
+        public Satellite(Satellite s) : this(s.Pos.Lat, s.Pos.Lon, s.Speed, s.RotSpeed, s.MaxRot)
+        {
+            CurrentRot = new Coords(s.CurrentRot);
+            CurrentTurn = s.CurrentTurn;
         }
 
         public void Move(int nbTurns)
@@ -54,13 +76,19 @@ namespace Hashcode.Qualif
                     break; //Lat is in legal range
             }
 
-            //adjust longitude
-            Pos.Lon += Coords.OneEightyDegrees; //put it in 0-360 range
-            Pos.Lon = Pos.Lon % Coords.ThreeSixtyDegrees;
-            if (Pos.Lon < 0)
-                Pos.Lon += Coords.ThreeSixtyDegrees;
-            Pos.Lon -= Coords.OneEightyDegrees; //put it back in game coords (-180 - 180)
+            AdjustLongitude(Pos);
         }
+
+        private static void AdjustLongitude(Coords coord)
+        {
+            //adjust longitude
+            coord.Lon += Coords.OneEightyDegrees; //put it in 0-360 range
+            coord.Lon = coord.Lon % Coords.ThreeSixtyDegrees;
+            if (coord.Lon < 0)
+                coord.Lon += Coords.ThreeSixtyDegrees;
+            coord.Lon -= Coords.OneEightyDegrees; //put it back in game coords (-180 - 180)
+        }
+
     }
 
     public class TimeRange
