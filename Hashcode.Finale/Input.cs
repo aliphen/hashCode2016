@@ -1,14 +1,21 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Policy;
+using NUnit.Framework;
 
 namespace Hashcode.Qualif
 {
     public class Coords
     {
+        public const int NinetyDegrees = 324000;
+        public const int OneEightyDegrees = 2*NinetyDegrees;
+        public const int ThreeSixtyDegrees = 4*NinetyDegrees;
+
+        /// <summary> aka φ </summary>
         public int Lat;
+        /// <summary> aka λ </summary>
         public int Lon;
     }
 
@@ -17,7 +24,7 @@ namespace Hashcode.Qualif
         public Coords CurrentRot;
         public int CurrentTurn;
         public readonly Coords Pos;
-        public readonly int Speed;
+        public int Speed;
         public readonly int RotSpeed;
         public readonly int MaxRot;
 
@@ -27,6 +34,37 @@ namespace Hashcode.Qualif
             Speed = speed;
             RotSpeed = rotSpeed;
             MaxRot = maxRot;
+        }
+
+        public void Move(int nbTurns)
+        {
+            Pos.Lat += Speed*nbTurns;
+            Pos.Lon += Input.EarthRotationSpeed*nbTurns;
+
+            while (true)
+            {
+                if (Pos.Lat > Coords.NinetyDegrees) //satellite flew over the North Pole
+                {
+                    Pos.Lat = Coords.OneEightyDegrees - Pos.Lat;
+                    Pos.Lon -= Coords.OneEightyDegrees;
+                    Speed = -Speed;
+                }
+                else if (Pos.Lat < -Coords.NinetyDegrees) //satellite flew over the South Pole
+                {
+                    Pos.Lat = -Coords.OneEightyDegrees - Pos.Lat;
+                    Pos.Lon -= Coords.OneEightyDegrees;
+                    Speed = -Speed;
+                }
+                else
+                    break; //Lat is in legal range
+            }
+
+            //adjust longitude
+            Pos.Lon += Coords.OneEightyDegrees; //put it in 0-360 range
+            Pos.Lon = Pos.Lon%Coords.ThreeSixtyDegrees;
+            if (Pos.Lon < 0)
+                Pos.Lon += Coords.ThreeSixtyDegrees;
+            Pos.Lon -= Coords.OneEightyDegrees; //put it back in game coords (-180 - 180)
         }
     }
 
