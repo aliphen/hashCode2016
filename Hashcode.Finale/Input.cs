@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
 
 namespace Hashcode.Qualif
 {
@@ -10,6 +13,7 @@ namespace Hashcode.Qualif
 
         /// <summary> aka φ </summary>
         public int Lat;
+
         /// <summary> aka λ </summary>
         public int Lon;
 
@@ -24,7 +28,8 @@ namespace Hashcode.Qualif
             Lon = lon;
         }
 
-        public Coords(Coords c) : this(c.Lat, c.Lon)
+        public Coords(Coords c)
+            : this(c.Lat, c.Lon)
         {
         }
 
@@ -47,7 +52,8 @@ namespace Hashcode.Qualif
             MaxRot = maxRot;
         }
 
-        public Satellite(Satellite s) : this(s.Pos.Lat, s.Pos.Lon, s.Speed, s.RotSpeed, s.MaxRot)
+        public Satellite(Satellite s)
+            : this(s.Pos.Lat, s.Pos.Lon, s.Speed, s.RotSpeed, s.MaxRot)
         {
             CurrentRot = new Coords(s.CurrentRot);
             CurrentTurn = s.CurrentTurn;
@@ -79,6 +85,13 @@ namespace Hashcode.Qualif
             AdjustLongitude(Pos);
         }
 
+        public Satellite NextTurn()
+        {
+            var s = new Satellite(this);
+            s.Move(1);
+            return s;
+        }
+
         private static void AdjustLongitude(Coords coord)
         {
             //adjust longitude
@@ -87,6 +100,31 @@ namespace Hashcode.Qualif
             if (coord.Lon < 0)
                 coord.Lon += Coords.ThreeSixtyDegrees;
             coord.Lon -= Coords.OneEightyDegrees; //put it back in game coords (-180 - 180)
+        }
+
+        public bool CanTakePictureNextTurn(Coords pict)
+        {
+            var next = NextTurn();
+
+            // delta satellite and camera position
+            var deltaLat = pict.Lat - (next.Pos.Lat + CurrentRot.Lat);
+            var deltaLon = pict.Lon - (next.Pos.Lon + CurrentRot.Lon);
+
+            // Can reach location next time
+            return Math.Abs(deltaLat) <= RotSpeed
+                   && Math.Abs(CurrentRot.Lat + deltaLat) <= MaxRot
+                   && Math.Abs(deltaLon) <= RotSpeed
+                   && Math.Abs(CurrentRot.Lon + deltaLon) <= MaxRot;
+        }
+
+        public void TakePicture(Coords pict)
+        {
+            // delta satellite and camera position
+            var deltaLat = pict.Lat - (Pos.Lat + CurrentRot.Lat);
+            var deltaLon = pict.Lon - (Pos.Lon + CurrentRot.Lon);
+
+            CurrentRot.Lat += deltaLat;
+            CurrentRot.Lon += deltaLon;
         }
 
     }
@@ -101,6 +139,11 @@ namespace Hashcode.Qualif
             Start = start;
             End = end;
         }
+
+        public bool IsInside(int turn)
+        {
+            return Start <= turn && turn <= End;
+        }
     }
 
     public class PicCollection
@@ -108,12 +151,25 @@ namespace Hashcode.Qualif
         public readonly int Value;
         public readonly List<Coords> Locations;
         public readonly List<TimeRange> TimeRanges;
+        public readonly List<Coords> TakenPictures;
 
         public PicCollection(int value)
         {
             Value = value;
             Locations = new List<Coords>();
             TimeRanges = new List<TimeRange>();
+            TakenPictures = new List<Coords>();
+        }
+
+        public void TakePicture(Coords coord)
+        {
+            TakenPictures.Add(coord);
+            Locations.Remove(coord);
+        }
+
+        public bool PictureCanBeTaken(int turn)
+        {
+            return TimeRanges.Any(range => range.Start <= turn && turn <= range.End);
         }
     }
 
