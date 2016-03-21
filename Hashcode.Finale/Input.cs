@@ -14,6 +14,7 @@ namespace Hashcode.Qualif
 
     public class Satellite
     {
+        public Coords CurrentRot;
         public readonly Coords Pos;
         public readonly int Speed;
         public readonly int RotSpeed;
