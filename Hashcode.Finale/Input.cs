@@ -132,12 +132,9 @@ namespace Hashcode.Qualif
 
         public void TakePicture(Coords pict)
         {
-            // delta satellite and camera position
-            var deltaLat = pict.Lat - (Pos.Lat + CurrentRot.Lat);
-            var deltaLon = pict.Lon - (Pos.Lon + CurrentRot.Lon);
-
-            CurrentRot.Lat += deltaLat;
-            CurrentRot.Lon += deltaLon;
+            CurrentRot.Lat = pict.Lat - Pos.Lat;
+            CurrentRot.Lon = pict.Lon - Pos.Lon;
+            Range = new Range(); //reset range to zero
         }
 
     }
