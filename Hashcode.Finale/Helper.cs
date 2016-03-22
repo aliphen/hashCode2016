@@ -25,14 +25,19 @@ namespace Hashcode.Qualif
             if (s.CurrentTurn > t.End)
                 return false;
 
+            s = new Satellite(s); //clone
             if(s.CurrentTurn < t.Start)
             {
-                //fast forward to start time
+                s.Move(t.Start - s.CurrentTurn);
             }
 
             for (int turn = t.Start; turn < t.End; turn++)
             {
-                //see if c is within range
+                if(c.IsInRange(s.Range, s.Pos))
+                {
+                    pictureTurn = t.Start + turn;
+                    return true;
+                }
             }
 
             return false;
