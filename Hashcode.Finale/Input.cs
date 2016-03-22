@@ -59,13 +59,15 @@ namespace Hashcode.Qualif
         public int Speed;
         public readonly int RotSpeed;
         public readonly int MaxRot;
+        public readonly int Id;
 
-        public Satellite(int lat, int lon, int speed, int rotSpeed, int maxRot)
+        public Satellite(int lat, int lon, int speed, int rotSpeed, int maxRot, int id)
         {
             Pos = new Coords { Lat = lat, Lon = lon };
             Speed = speed;
             RotSpeed = rotSpeed;
             MaxRot = maxRot;
+            Id = id;
         }
 
         public Satellite(Satellite s)
@@ -130,11 +132,15 @@ namespace Hashcode.Qualif
             return pict.IsInRange(next.Range, next.Pos);
         }
 
-        public void TakePicture(Coords pict)
+        /// <summary>
+        /// assumes satellite is already at the right position
+        /// </summary>
+        public Snapshot TakePicture(Coords pict)
         {
             CurrentRot.Lat = pict.Lat - Pos.Lat;
             CurrentRot.Lon = pict.Lon - Pos.Lon;
             Range = new Range(); //reset range to zero
+            return new Snapshot(pict.Lat, pict.Lon, CurrentTurn, Id);
         }
 
     }

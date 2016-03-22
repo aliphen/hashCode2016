@@ -22,7 +22,8 @@ namespace Hashcode.Qualif
                         lon: line[1],
                         speed: line[2],
                         rotSpeed: line[3],
-                        maxRot: line[4]);
+                        maxRot: line[4],
+                        id: i);
                     input.Satellites.Add(sat);
                 }
 
