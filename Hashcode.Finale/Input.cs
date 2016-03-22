@@ -38,7 +38,7 @@ namespace Hashcode.Qualif
             return origin.Lat + range.DeltaLatMin <= Lat
             && origin.Lat + range.DeltaLatMax >= Lat
             && origin.Lon + range.DeltaLonMin <= Lon
-            && origin.Lon + range.DeltaLonMin <= Lon;
+            && origin.Lon + range.DeltaLonMax >= Lon;
         }
 
         public override string ToString()
@@ -54,6 +54,19 @@ namespace Hashcode.Qualif
         public int DeltaLonMin;
         public int DeltaLonMax;
 
+        public Range()
+        {
+
+        }
+
+        public Range(Range range)
+        {
+            DeltaLatMin = range.DeltaLatMin;
+            DeltaLatMax = range.DeltaLatMax;
+            DeltaLonMin = range.DeltaLonMin;
+            DeltaLonMax = range.DeltaLonMax;
+        }
+
         public override string ToString()
         {
             return string.Format("φ {0},{1} λ {2},{3}", DeltaLatMin, DeltaLatMax, DeltaLonMin, DeltaLonMax);
@@ -62,8 +75,8 @@ namespace Hashcode.Qualif
 
     public class Satellite
     {
-        public Range Range;
-        public Coords CurrentRot;
+        public Range Range = new Range();
+        public Coords CurrentRot = new Coords();
         public int CurrentTurn;
         public readonly Coords Pos;
         public int Speed;
@@ -85,10 +98,13 @@ namespace Hashcode.Qualif
         {
             CurrentRot = new Coords(s.CurrentRot);
             CurrentTurn = s.CurrentTurn;
+            Range = new Range(s.Range);
         }
 
         public void Move(int nbTurns)
         {
+            CurrentTurn += nbTurns;
+
             Pos.Lat += Speed * nbTurns;
             Pos.Lon += Input.EarthRotationSpeed * nbTurns;
 
@@ -112,10 +128,14 @@ namespace Hashcode.Qualif
 
             AdjustLongitude(Pos);
 
-            Range.DeltaLatMin = Math.Max(-MaxRot, CurrentRot.Lat - RotSpeed*nbTurns);
-            Range.DeltaLatMax = Math.Min(MaxRot, CurrentRot.Lat + RotSpeed*nbTurns);
-            Range.DeltaLonMin = Math.Max(-MaxRot, CurrentRot.Lon - RotSpeed*nbTurns);
-            Range.DeltaLonMax = Math.Min(MaxRot, CurrentRot.Lon + RotSpeed*nbTurns);
+            Range.DeltaLatMin -= RotSpeed*nbTurns;
+            Range.DeltaLatMin = Math.Max(Range.DeltaLatMin, -MaxRot);
+            Range.DeltaLatMax += RotSpeed*nbTurns;
+            Range.DeltaLatMax = Math.Min(Range.DeltaLatMax, MaxRot);
+            Range.DeltaLonMin -= RotSpeed*nbTurns;
+            Range.DeltaLonMin = Math.Max(Range.DeltaLonMin, -MaxRot);
+            Range.DeltaLonMax += RotSpeed*nbTurns;
+            Range.DeltaLonMax = Math.Min(Range.DeltaLonMax, MaxRot);
         }
 
         public Satellite NextTurn()
@@ -149,7 +169,7 @@ namespace Hashcode.Qualif
         {
             CurrentRot.Lat = pict.Lat - Pos.Lat;
             CurrentRot.Lon = pict.Lon - Pos.Lon;
-            Range = new Range(); //reset range to zero
+            Range = new Range{DeltaLatMin = CurrentRot.Lat, DeltaLatMax = CurrentRot.Lat, DeltaLonMin = CurrentRot.Lon, DeltaLonMax = CurrentRot.Lon}; //reset range to zero around current direction
             return new Snapshot(pict.Lat, pict.Lon, CurrentTurn, Id);
         }
 

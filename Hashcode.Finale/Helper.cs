@@ -31,13 +31,14 @@ namespace Hashcode.Qualif
                 s.Move(t.Start - s.CurrentTurn);
             }
 
-            for (int turn = t.Start; turn < t.End; turn++)
+            for (int turn = Math.Max(t.Start, s.CurrentTurn); turn < t.End; turn++)
             {
                 if(c.IsInRange(s.Range, s.Pos))
                 {
-                    pictureTurn = t.Start + turn;
+                    pictureTurn = turn;
                     return true;
                 }
+                s.Move(1);
             }
 
             return false;
