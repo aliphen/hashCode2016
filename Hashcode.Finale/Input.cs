@@ -71,7 +71,7 @@ namespace Hashcode.Qualif
         }
 
         public Satellite(Satellite s)
-            : this(s.Pos.Lat, s.Pos.Lon, s.Speed, s.RotSpeed, s.MaxRot)
+            : this(s.Pos.Lat, s.Pos.Lon, s.Speed, s.RotSpeed, s.MaxRot, s.Id)
         {
             CurrentRot = new Coords(s.CurrentRot);
             CurrentTurn = s.CurrentTurn;

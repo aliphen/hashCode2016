@@ -9,7 +9,7 @@ namespace Hashcode.Qualif
         [TestCase(3600, 39600L, 601200L)]
         public void SatelliteMoveIsCorrect(int nbTurn, long expectedLat, long expectedLon)
         {
-            var satellite = new Satellite(176400, 7200, 120, 0, 0);
+            var satellite = new Satellite(176400, 7200, 120, 0, 0, 0);
 
             satellite.Move(nbTurn);
 
