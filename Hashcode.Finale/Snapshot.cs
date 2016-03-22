@@ -4,12 +4,12 @@ namespace Hashcode.Qualif
 {
     public class Snapshot
     {
-        public long Lat { get; set; }
-        public long Lon { get; set; }
+        public int Lat { get; set; }
+        public int Lon { get; set; }
         public int Turn { get; set; }
         public int SatelliteId { get; set; }
 
-        public Snapshot(long lat, long lon, int turn, int satelliteId)
+        public Snapshot(int lat, int lon, int turn, int satelliteId)
         {
             Lat = lat;
             Lon = lon;

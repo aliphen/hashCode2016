@@ -1,17 +1,27 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using System.Text;
+using NUnit.Framework;
 
 namespace Hashcode.Qualif
 {
     public class Solution
     {
-        private readonly Input _input;
+        private readonly List<Snapshot> _snapshots;
 
         public int Score { get; private set; }
 
-        public Solution(Input input)
+        public Solution(List<Snapshot> snapshots)
         {
-            _input = input;
+            _snapshots = snapshots;
             Score = 1;
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(_snapshots.Count.ToString());
+            _snapshots.ForEach(s => sb.AppendLine(s.ToString()));
+            return sb.ToString();
         }
 
         public class Tests
