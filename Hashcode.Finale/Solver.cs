@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Hashcode.Qualif
 {
@@ -7,25 +8,49 @@ namespace Hashcode.Qualif
     {
         public static Solution Solve(Input input)
         {
-            var solution = new Solution(input);
+            var snapShots = new List<Snapshot>();
+            //var solution = new Solution(input);
 
-            var id = 0;
-            var satellite = input.Satellites[id];
-
-            var takenPicture = new List<Snapshot>();
-
-            for (int i = 0; i < input.NbTurns; i++)
+            for (var id = 0; id < input.Satellites.Count; id++)
             {
-                foreach (var pictCollection in input.Collections)
+                Console.WriteLine("Sat " + id);
+                var satellite = input.Satellites[id];
+
+                while (true)
                 {
-                    foreach (var pict in pictCollection.Locations)
+                    var closestTurn = 1000000; //longer than any simu
+                    Coords closestPicture = null;
+                    Action remover = null;
+                    foreach (var col in input.Collections)
                     {
-                        
+                        for (int p = 0; p < col.Locations.Count; p++)
+                        {
+                            var pic = col.Locations[p];
+                            foreach (var range in col.TimeRanges)
+                            {
+                                if (range.Start > satellite.CurrentTurn + closestTurn)
+                                    continue;
+                                int turn;
+                                if (satellite.CanTakePicture(pic, range, out turn, closestTurn) && turn < closestTurn)
+                                {
+                                    closestTurn = turn;
+                                    closestPicture = pic;
+                                    var idx = p;
+                                    remover = () => col.Locations.RemoveAt(idx);
+                                }
+                            }
+                        }
                     }
+                    if (closestPicture == null)
+                        break;
+                    satellite.Move(closestTurn - satellite.CurrentTurn);
+                    snapShots.Add(satellite.TakePicture(closestPicture));
+                    remover();
+                    Console.WriteLine(closestTurn);
                 }
             }
 
-            return solution;
+            return new Solution(snapShots);
         }
     }
 }

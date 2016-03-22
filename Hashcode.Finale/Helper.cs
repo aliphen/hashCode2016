@@ -18,7 +18,7 @@ namespace Hashcode.Qualif
 #endif
         }
 
-        public static bool CanTakePicture(this Satellite s, Coords c, TimeRange t, out int pictureTurn)
+        public static bool CanTakePicture(this Satellite s, Coords c, TimeRange t, out int pictureTurn, int maxTurn)
         {
             pictureTurn = 0;
 
@@ -31,7 +31,7 @@ namespace Hashcode.Qualif
                 s.Move(t.Start - s.CurrentTurn);
             }
 
-            for (int turn = Math.Max(t.Start, s.CurrentTurn); turn < t.End; turn++)
+            for (int turn = Math.Max(t.Start, s.CurrentTurn); turn < Math.Min(t.End, maxTurn); turn++)
             {
                 if(c.IsInRange(s.Range, s.Pos))
                 {
