@@ -40,6 +40,11 @@ namespace Hashcode.Qualif
             && origin.Lon + range.DeltaLonMin <= Lon
             && origin.Lon + range.DeltaLonMin <= Lon;
         }
+
+        public override string ToString()
+        {
+            return string.Format("φ {0} λ {1}", Lat, Lon);
+        }
     }
 
     public class Range
@@ -48,6 +53,11 @@ namespace Hashcode.Qualif
         public int DeltaLatMax;
         public int DeltaLonMin;
         public int DeltaLonMax;
+
+        public override string ToString()
+        {
+            return string.Format("φ {0},{1} λ {2},{3}", DeltaLatMin, DeltaLatMax, DeltaLonMin, DeltaLonMax);
+        }
     }
 
     public class Satellite

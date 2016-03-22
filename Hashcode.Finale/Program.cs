@@ -27,7 +27,7 @@ namespace Hashcode.Qualif
 
                     var sw = Stopwatch.StartNew();
                     var solution = Solver.Solve(input);
-                    Console.WriteLine(fileName[6] + "\t" + solution.Score + "\t" + sw.ElapsedMilliseconds + "ms");
+                    Console.WriteLine(fileName.Substring(6, 7) + "\t" + solution.Score + "\t" + sw.ElapsedMilliseconds + "ms");
 
                     //write output file if better than before
                     if (solution.Score > scores[i])
