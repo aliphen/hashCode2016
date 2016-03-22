@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
+using System.Net;
 
 namespace Hashcode.Qualif
 {
-    public class Coords
+    public class Coords : IEquatable<Coords>
     {
         public const int NinetyDegrees = 324000;
         public const int OneEightyDegrees = 2 * NinetyDegrees;
@@ -13,6 +13,29 @@ namespace Hashcode.Qualif
 
         /// <summary> aka φ </summary>
         public int Lat;
+
+        public bool Equals(Coords other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Lat == other.Lat && Lon == other.Lon;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Coords)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Lat * 397) ^ Lon;
+            }
+        }
 
         /// <summary> aka λ </summary>
         public int Lon;
@@ -37,12 +60,18 @@ namespace Hashcode.Qualif
 
     public class Satellite
     {
-        public Coords CurrentRot;
-        public int CurrentTurn;
-        public readonly Coords Pos;
-        public int Speed;
         public readonly int RotSpeed;
         public readonly int MaxRot;
+
+        public int Speed;
+        public readonly Coords Pos;
+        public int CurrentTurn;
+        public Coords CurrentRot;
+
+        public int Top = 0;
+        public int Bottom = 0;
+        public int Right = 0;
+        public int Left = 0;
 
         public Satellite(int lat, int lon, int speed, int rotSpeed, int maxRot)
         {
@@ -50,81 +79,86 @@ namespace Hashcode.Qualif
             Speed = speed;
             RotSpeed = rotSpeed;
             MaxRot = maxRot;
+            CurrentRot = new Coords(0, 0);
         }
 
         public Satellite(Satellite s)
             : this(s.Pos.Lat, s.Pos.Lon, s.Speed, s.RotSpeed, s.MaxRot)
         {
+            Speed = s.Speed;
+            Pos = new Coords(s.Pos.Lat, s.Pos.Lon);
             CurrentRot = new Coords(s.CurrentRot);
             CurrentTurn = s.CurrentTurn;
+            Top = s.Top;
+            Bottom = s.Bottom;
+            Right = s.Right;
+            Left = s.Left;
+        }
+
+        public bool CanTakePicture(Coords pict)
+        {
+            return ((pict.Lat <= Pos.Lat + Top) && (pict.Lat >= Pos.Lat + Bottom)) && (pict.Lon >= Pos.Lon + Left) &&
+                   (pict.Lon <= Pos.Lon + Right);
+        }
+
+        public bool CanTakePicture(int pictLat, int pictLon)
+        {
+            return ((pictLat <= Pos.Lat + Top) && (pictLat >= Pos.Lat + Bottom)) && (pictLon >= Pos.Lon + Left) &&
+               (pictLon <= Pos.Lon + Right);
+        }
+
+        public Snapshot TakePicture(Coords pict, int satelliteId)
+        {
+            CurrentRot.Lat = pict.Lat - Pos.Lat;
+            CurrentRot.Lon = pict.Lon - Pos.Lon;
+
+            Top = CurrentRot.Lat;
+            Left = CurrentRot.Lon;
+            Bottom = CurrentRot.Lat;
+            Right = CurrentRot.Lon;
+
+            return new Snapshot(pict.Lat, pict.Lon, CurrentTurn, satelliteId);
+        }
+
+        public void NextTurn()
+        {
+            Pos.Lat += Speed;
+            Pos.Lon += Input.EarthRotationSpeed;
+
+            Top = Math.Min(Top + RotSpeed, MaxRot);
+            Bottom = Math.Max(Bottom - RotSpeed, -MaxRot);
+            Left = Math.Max(Left - RotSpeed, -MaxRot);
+            Right = Math.Min(Right + RotSpeed, MaxRot);
+
+            if (Pos.Lat > Coords.NinetyDegrees) //satellite flew over the North Pole
+            {
+                Pos.Lat = Coords.OneEightyDegrees - Pos.Lat;
+                Pos.Lon -= Coords.OneEightyDegrees;
+                Speed = -Speed;
+            }
+            else if (Pos.Lat < -Coords.NinetyDegrees) //satellite flew over the South Pole
+            {
+                Pos.Lat = -Coords.OneEightyDegrees - Pos.Lat;
+                Pos.Lon -= Coords.OneEightyDegrees;
+                Speed = -Speed;
+            }
+
+            //adjust longitude
+            Pos.Lon += Coords.OneEightyDegrees; //put it in 0-360 range
+            Pos.Lon = Pos.Lon % Coords.ThreeSixtyDegrees;
+            if (Pos.Lon < 0)
+                Pos.Lon += Coords.ThreeSixtyDegrees;
+            Pos.Lon -= Coords.OneEightyDegrees; //put it back in game coords (-180 - 180)
+
+            ++CurrentTurn;
         }
 
         public void Move(int nbTurns)
         {
-            Pos.Lat += Speed * nbTurns;
-            Pos.Lon += Input.EarthRotationSpeed * nbTurns;
-
-            while (true)
+            for (var i = 0; i < nbTurns; ++i)
             {
-                if (Pos.Lat > Coords.NinetyDegrees) //satellite flew over the North Pole
-                {
-                    Pos.Lat = Coords.OneEightyDegrees - Pos.Lat;
-                    Pos.Lon -= Coords.OneEightyDegrees;
-                    Speed = -Speed;
-                }
-                else if (Pos.Lat < -Coords.NinetyDegrees) //satellite flew over the South Pole
-                {
-                    Pos.Lat = -Coords.OneEightyDegrees - Pos.Lat;
-                    Pos.Lon -= Coords.OneEightyDegrees;
-                    Speed = -Speed;
-                }
-                else
-                    break; //Lat is in legal range
+                NextTurn();
             }
-
-            AdjustLongitude(Pos);
-        }
-
-        public Satellite NextTurn()
-        {
-            var s = new Satellite(this);
-            s.Move(1);
-            return s;
-        }
-
-        private static void AdjustLongitude(Coords coord)
-        {
-            //adjust longitude
-            coord.Lon += Coords.OneEightyDegrees; //put it in 0-360 range
-            coord.Lon = coord.Lon % Coords.ThreeSixtyDegrees;
-            if (coord.Lon < 0)
-                coord.Lon += Coords.ThreeSixtyDegrees;
-            coord.Lon -= Coords.OneEightyDegrees; //put it back in game coords (-180 - 180)
-        }
-
-        public bool CanTakePictureNextTurn(Coords pict)
-        {
-            var next = NextTurn();
-
-            // delta satellite and camera position
-            var deltaLat = pict.Lat - (next.Pos.Lat + CurrentRot.Lat);
-            var deltaLon = pict.Lon - (next.Pos.Lon + CurrentRot.Lon);
-
-            // Can reach location next time
-            return Math.Abs(deltaLat) <= RotSpeed
-                   && Math.Abs(CurrentRot.Lat + deltaLat) <= MaxRot
-                   && Math.Abs(deltaLon) <= RotSpeed
-                   && Math.Abs(CurrentRot.Lon + deltaLon) <= MaxRot;
-        }
-
-        public void TakePicture(Coords pict)
-        {
-            // delta satellite and camera position
-            var deltaLat = pict.Lat - (Pos.Lat + CurrentRot.Lat);
-            var deltaLon = pict.Lon - (Pos.Lon + CurrentRot.Lon);
-
-            CurrentRot.Lat += deltaLat;
-            CurrentRot.Lon += deltaLon;
         }
 
     }
@@ -140,7 +174,7 @@ namespace Hashcode.Qualif
             End = end;
         }
 
-        public bool IsInside(int turn)
+        public bool Contains(int turn)
         {
             return Start <= turn && turn <= End;
         }
@@ -169,7 +203,7 @@ namespace Hashcode.Qualif
 
         public bool PictureCanBeTaken(int turn)
         {
-            return TimeRanges.Any(range => range.Start <= turn && turn <= range.End);
+            return TimeRanges.Any(r => r.Contains(turn));
         }
     }
 
