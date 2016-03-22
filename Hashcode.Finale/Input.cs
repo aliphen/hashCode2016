@@ -33,10 +33,26 @@ namespace Hashcode.Qualif
         {
         }
 
+        public bool IsInRange(Range range, Coords origin)
+        {
+            return origin.Lat + range.DeltaLatMin <= Lat
+            && origin.Lat + range.DeltaLatMax >= Lat
+            && origin.Lon + range.DeltaLonMin <= Lon
+            && origin.Lon + range.DeltaLonMin <= Lon;
+        }
+    }
+
+    public class Range
+    {
+        public int DeltaLatMin;
+        public int DeltaLatMax;
+        public int DeltaLonMin;
+        public int DeltaLonMax;
     }
 
     public class Satellite
     {
+        public Range Range;
         public Coords CurrentRot;
         public int CurrentTurn;
         public readonly Coords Pos;
@@ -83,6 +99,11 @@ namespace Hashcode.Qualif
             }
 
             AdjustLongitude(Pos);
+
+            Range.DeltaLatMin = Math.Max(-MaxRot, CurrentRot.Lat - RotSpeed*nbTurns);
+            Range.DeltaLatMax = Math.Min(MaxRot, CurrentRot.Lat + RotSpeed*nbTurns);
+            Range.DeltaLonMin = Math.Max(-MaxRot, CurrentRot.Lon - RotSpeed*nbTurns);
+            Range.DeltaLonMax = Math.Min(MaxRot, CurrentRot.Lon + RotSpeed*nbTurns);
         }
 
         public Satellite NextTurn()
@@ -106,15 +127,7 @@ namespace Hashcode.Qualif
         {
             var next = NextTurn();
 
-            // delta satellite and camera position
-            var deltaLat = pict.Lat - (next.Pos.Lat + CurrentRot.Lat);
-            var deltaLon = pict.Lon - (next.Pos.Lon + CurrentRot.Lon);
-
-            // Can reach location next time
-            return Math.Abs(deltaLat) <= RotSpeed
-                   && Math.Abs(CurrentRot.Lat + deltaLat) <= MaxRot
-                   && Math.Abs(deltaLon) <= RotSpeed
-                   && Math.Abs(CurrentRot.Lon + deltaLon) <= MaxRot;
+            return pict.IsInRange(next.Range, next.Pos);
         }
 
         public void TakePicture(Coords pict)
