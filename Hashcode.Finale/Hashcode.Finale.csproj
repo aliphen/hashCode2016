@@ -37,7 +37,9 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Coords.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="Satellite.cs" />
     <Compile Include="Snapshot.cs" />
     <Compile Include="Solution.cs" />
     <Compile Include="Program.cs" />
