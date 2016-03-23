@@ -11,9 +11,8 @@ namespace Hashcode.Qualif
         {
             var inputs = new[]
             {
-   
                 "../../forever_alone.in",
-                             "../../constellation.in",
+                "../../constellation.in",
                 "../../overlap.in",
                 "../../weekend.in",
             };
@@ -27,8 +26,8 @@ namespace Hashcode.Qualif
                     var input = Parser.Parse(fileName);
 
                     var sw = Stopwatch.StartNew();
-                    var solution = Solver.Solve(input);
-                    Console.WriteLine(fileName[6] + "\t" + solution.Score + "\t" + sw.ElapsedMilliseconds + "ms");
+                    var solution = SolverGui.Solve(input);
+                    Console.WriteLine(fileName.Substring(6, 7) + "\t" + solution.Score + "\t" + sw.ElapsedMilliseconds + "ms");
 
                     //write output file if better than before
                     if (solution.Score > scores[i])

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Hardkjarni.Clustering;
 using KdTree;
 using KdTree.Math;
 
 namespace Hashcode.Qualif
 {
-    internal class Solver
+    internal class SolverGui
     {
         public static Solution Solve(Input input)
         {
@@ -37,7 +36,7 @@ namespace Hashcode.Qualif
                     if (node.Length > 0)
                     {
                         var valids = node.Where(n => n.Value.PictureCanBeTaken(turn))
-                            .Where(k => satellite.CanTakePicture((int) k.Point[0], (int) k.Point[1]))
+                            .Where(k => satellite.CanTakePicture((int)k.Point[0], (int)k.Point[1]))
                             .OrderByDescending(k => Math.Pow(k.Point[0] - satellite.Pos.Lat, 2) + Math.Pow(k.Point[1] - satellite.Pos.Lon, 2))
                             //.OrderByDescending(k => k.Value.TakenPictures.Count)
                             .ToList();
@@ -47,7 +46,7 @@ namespace Hashcode.Qualif
                             Console.WriteLine("Found {0} valid new positions", valids.Count);
 
                             var pict = valids[0];
-                            var pictCoord = new Coords((int) pict.Point[0], (int) pict.Point[1]);
+                            var pictCoord = new Coords((int)pict.Point[0], (int)pict.Point[1]);
 
                             var snap = satellite.TakePicture(pictCoord);
                             takenPictures.Add(snap);
@@ -58,7 +57,7 @@ namespace Hashcode.Qualif
                             ////Console.WriteLine("Satellite Lat {0} Lon {1} Pict {2} {3} Rot {4} {5}", satellite.Pos.Lat,
                             //satellite.Pos.Lon, pict.Point[0], pict.Point[1], satellite.CurrentRot.Lat, satellite.CurrentRot.Lon);
                         }
-                
+
                     }
                     satellite.NextTurn();
                 }
@@ -96,7 +95,7 @@ namespace Hashcode.Qualif
             copySatellite.NextTurn();
             return tree.RadialSearch(new float[] { copySatellite.Pos.Lat, copySatellite.Pos.Lon }, copySatellite.MaxRot, 150)
                 .Where(no => no.Value.PictureCanBeTaken(copySatellite.CurrentTurn))
-                .Where(k => copySatellite.CanTakePicture((int)k.Point[0], (int)k.Point[1])).Count() + GetNumberPictInRangeFixTrajectory(copySatellite,tree, --maxIter);
+                .Where(k => copySatellite.CanTakePicture((int)k.Point[0], (int)k.Point[1])).Count() + GetNumberPictInRangeFixTrajectory(copySatellite, tree, --maxIter);
         }
 
     }

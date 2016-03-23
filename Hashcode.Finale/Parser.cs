@@ -18,12 +18,12 @@ namespace Hashcode.Qualif
                 {
                     var line = ReadMulti(reader);
                     var sat = new Satellite(
-                        id: i,
                         lat: line[0],
                         lon: line[1],
                         speed: line[2],
                         rotSpeed: line[3],
-                        maxRot: line[4]);
+                        maxRot: line[4],
+                        id: i);
                     input.Satellites.Add(sat);
                 }
 

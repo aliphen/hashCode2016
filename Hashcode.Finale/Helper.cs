@@ -17,5 +17,38 @@ namespace Hashcode.Qualif
             Debug.Assert(test(), message);
 #endif
         }
+
+        public static bool CanTakePicture(this Satellite s, Coords c, TimeRange t, out int pictureTurn, int maxTurn)
+        {
+            pictureTurn = 0;
+
+            if (s.CurrentTurn > t.End)
+                return false;
+
+            s = new Satellite(s); //clone
+            if(s.CurrentTurn < t.Start)
+            {
+                s.Move(t.Start - s.CurrentTurn);
+            }
+
+            for (int turn = Math.Max(t.Start, s.CurrentTurn); turn < Math.Min(t.End, maxTurn); turn++)
+            {
+                if(c.IsInRange(s.Range, s.Pos))
+                {
+                    pictureTurn = turn;
+                    return true;
+                }
+                s.Move(1);
+            }
+
+            return false;
+        }
+
+        public static bool IsInRange(this Satellite s, Coords c)
+        {
+            var dLat = Math.Abs(s.Pos.Lat - c.Lat);
+            var dLon = Math.Abs(s.Pos.Lon - c.Lon);
+            return dLat < s.MaxRot && dLon < s.MaxRot;
+        }
     }
 }
