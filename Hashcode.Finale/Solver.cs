@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Hashcode.Qualif
 {
     internal class Solver
     {
+        private static object locker = new object();
+
         public static Solution Solve(Input input)
         {
             var snapShots = new List<Snapshot>();
@@ -21,7 +25,8 @@ namespace Hashcode.Qualif
                     var closestTurn = 1000000; //longer than any simu
                     Coords closestPicture = null;
                     Action remover = null;
-                    foreach (var col in input.Collections)
+                    Parallel.ForEach(input.Collections, col =>
+                    //foreach (var col in input.Collections)
                     {
                         for (int p = 0; p < col.Locations.Count; p++)
                         {
@@ -33,14 +38,20 @@ namespace Hashcode.Qualif
                                 int turn;
                                 if (satellite.CanTakePicture(pic, range, out turn, closestTurn) && turn < closestTurn)
                                 {
-                                    closestTurn = turn;
-                                    closestPicture = pic;
-                                    var idx = p;
-                                    remover = () => col.Locations.RemoveAt(idx);
+                                    lock(locker)
+                                    {
+                                        if (turn < closestTurn)
+                                        {
+                                            closestTurn = turn;
+                                            closestPicture = pic;
+                                            var idx = p;
+                                            remover = () => col.Locations.RemoveAt(idx);
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
+                    });
                     if (closestPicture == null)
                         break;
                     satellite.Move(closestTurn - satellite.CurrentTurn);
