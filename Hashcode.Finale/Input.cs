@@ -60,6 +60,8 @@ namespace Hashcode.Qualif
 
     public class Satellite
     {
+
+        private static readonly Random Rng = new Random(BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0));
         public readonly int RotSpeed;
         public readonly int MaxRot;
 
@@ -73,8 +75,11 @@ namespace Hashcode.Qualif
         public int Right = 0;
         public int Left = 0;
 
-        public Satellite(int lat, int lon, int speed, int rotSpeed, int maxRot)
+        public int Id;
+
+        public Satellite(int id, int lat, int lon, int speed, int rotSpeed, int maxRot)
         {
+            Id = id;
             Pos = new Coords { Lat = lat, Lon = lon };
             Speed = speed;
             RotSpeed = rotSpeed;
@@ -83,16 +88,23 @@ namespace Hashcode.Qualif
         }
 
         public Satellite(Satellite s)
-            : this(s.Pos.Lat, s.Pos.Lon, s.Speed, s.RotSpeed, s.MaxRot)
         {
+            Pos = new Coords(s.Pos);
             Speed = s.Speed;
-            Pos = new Coords(s.Pos.Lat, s.Pos.Lon);
             CurrentRot = new Coords(s.CurrentRot);
             CurrentTurn = s.CurrentTurn;
             Top = s.Top;
             Bottom = s.Bottom;
             Right = s.Right;
             Left = s.Left;
+            RotSpeed = s.RotSpeed;
+            MaxRot = s.MaxRot;
+            Id = s.Id;
+        }
+
+        public Satellite Clone()
+        {
+            return new Satellite(this);
         }
 
         public bool CanTakePicture(Coords pict)
@@ -107,17 +119,73 @@ namespace Hashcode.Qualif
                (pictLon <= Pos.Lon + Right);
         }
 
-        public Snapshot TakePicture(Coords pict, int satelliteId)
+        public Snapshot TakePicture(Coords pict)
         {
-            CurrentRot.Lat = pict.Lat - Pos.Lat;
-            CurrentRot.Lon = pict.Lon - Pos.Lon;
+            return TakePicture(pict.Lat, pict.Lon);
+        }
+
+        public Snapshot TakePicture(int pictLat, int pictLon)
+        {
+            CurrentRot.Lat = pictLat - Pos.Lat;
+            CurrentRot.Lon = pictLon - Pos.Lon;
 
             Top = CurrentRot.Lat;
             Left = CurrentRot.Lon;
             Bottom = CurrentRot.Lat;
             Right = CurrentRot.Lon;
 
-            return new Snapshot(pict.Lat, pict.Lon, CurrentTurn, satelliteId);
+            return new Snapshot(pictLat, pictLon, CurrentTurn, Id);
+        }
+
+        public void RandomCameraMove()
+        {
+            int maxTries = 10;
+            while (maxTries > 0)
+            {
+                var moveLat = Rng.Next(-RotSpeed, RotSpeed);
+                var moveLon = Rng.Next(-RotSpeed, RotSpeed);
+                if (CanTakePicture(Pos.Lat + moveLat, Pos.Lon + moveLon))
+                {
+                    TakePicture(Pos.Lat + moveLat, Pos.Lon + moveLon);
+                    return;
+                }
+                --maxTries;
+            }
+        }
+
+        private bool _goRight = false;
+
+        public void TryGoRightThenLeft()
+        {
+            if (_goRight)
+            {
+                if (CurrentRot.Lat + RotSpeed < MaxRot)
+                {
+                    CurrentRot.Lat += 1;
+                    CurrentRot.Lon += 1;
+                }
+                else
+                {
+                    CurrentRot.Lat -= 1;
+                    CurrentRot.Lon -= 1;
+                    _goRight = false;
+                }
+            }
+            else
+            {
+                if (CurrentRot.Lat - RotSpeed > -MaxRot)
+                {
+                    CurrentRot.Lat -= 1;
+                    CurrentRot.Lon -= 1;
+                }
+                else
+                {
+                    CurrentRot.Lat += 1;
+                    CurrentRot.Lon += 1;
+                    _goRight = true;
+                }
+                
+            }
         }
 
         public void NextTurn()

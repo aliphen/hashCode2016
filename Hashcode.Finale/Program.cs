@@ -11,8 +11,9 @@ namespace Hashcode.Qualif
         {
             var inputs = new[]
             {
-                "../../constellation.in",
+   
                 "../../forever_alone.in",
+                             "../../constellation.in",
                 "../../overlap.in",
                 "../../weekend.in",
             };
