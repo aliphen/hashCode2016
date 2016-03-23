@@ -24,6 +24,7 @@ namespace Hashcode.Qualif
                 {
                     var closestTurn = 1000000; //longer than any simu
                     Coords closestPicture = null;
+                    PicCollection closestPicCollection = null;
                     Action remover = null;
                     Parallel.ForEach(input.Collections, col =>
                     //foreach (var col in input.Collections)
@@ -44,6 +45,7 @@ namespace Hashcode.Qualif
                                         {
                                             closestTurn = turn;
                                             closestPicture = pic;
+                                            closestPicCollection = col;
                                             var idx = p;
                                             remover = () => col.Locations.RemoveAt(idx);
                                         }
@@ -56,12 +58,14 @@ namespace Hashcode.Qualif
                         break;
                     satellite.Move(closestTurn - satellite.CurrentTurn);
                     snapShots.Add(satellite.TakePicture(closestPicture));
+                    closestPicCollection.TakePicture(closestPicture);
                     remover();
                     Console.WriteLine(closestTurn);
                 }
             }
 
-            return new Solution(snapShots, 1);
+            var score = input.Collections.Where(c => (c.Locations.Count == 0) && (c.TakenPictures.Count > 0)).Sum(p => p.Value);
+            return new Solution(snapShots, score);
         }
     }
 }

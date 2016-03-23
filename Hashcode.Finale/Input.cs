@@ -64,7 +64,6 @@ namespace Hashcode.Qualif
         public void TakePicture(Coords coord)
         {
             TakenPictures.Add(coord);
-            Locations.Remove(coord);
         }
 
         public bool PictureCanBeTaken(int turn)
