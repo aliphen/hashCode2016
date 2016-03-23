@@ -10,10 +10,10 @@ namespace Hashcode.Qualif
 
         public int Score { get; private set; }
 
-        public Solution(List<Snapshot> snapshots)
+        public Solution(List<Snapshot> snapshots, int score)
         {
             _snapshots = snapshots;
-            Score = 1;
+            Score = score;
         }
 
         public override string ToString()

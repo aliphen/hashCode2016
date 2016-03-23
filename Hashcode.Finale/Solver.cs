@@ -64,7 +64,10 @@ namespace Hashcode.Qualif
                 } 
             }
 
-            var solution = new Solution(takenPictures);
+
+            var score = input.Collections.Where(c => c.Locations.Count == 0 && c.TakenPictures.Count > 0).Sum(p => p.Value);
+
+            var solution = new Solution(takenPictures, score);
 
             return solution;
         }
