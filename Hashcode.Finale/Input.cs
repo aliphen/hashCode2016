@@ -16,6 +16,19 @@ namespace Hashcode.Qualif
         {
         }
 
+        /// <summary>
+        /// creates a range of size zero on the delta between coords and orig
+        /// </summary>
+        public Range(Coords origin, Coords coords)
+        {
+            var lat = coords.Lat - origin.Lat;
+            var lon = coords.Lon - origin.Lon;
+            DeltaLatMin = lat;
+            DeltaLatMax = lat;
+            DeltaLonMin = lon;
+            DeltaLonMax = lon;
+        }
+
         public Range(Range range)
         {
             DeltaLatMin = range.DeltaLatMin;
@@ -34,6 +47,14 @@ namespace Hashcode.Qualif
             DeltaLonMin = Math.Max(DeltaLonMin, -maxRot);
             DeltaLonMax += rotSpeed * nbTurns;
             DeltaLonMax = Math.Min(DeltaLonMax, maxRot);
+        }
+
+        public bool Contains(Range other)
+        {
+            return other.DeltaLatMin >= DeltaLatMin
+                   && other.DeltaLatMax <= DeltaLatMax
+                   && other.DeltaLonMin >= DeltaLonMin
+                   && other.DeltaLonMax <= DeltaLonMax;
         }
 
         public override string ToString()
