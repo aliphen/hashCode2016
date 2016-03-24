@@ -8,6 +8,8 @@ namespace Hashcode.Qualif
 {
     internal class SolverGui
     {
+        public static readonly float SQRT2 = (float)Math.Sqrt(2);
+
         public static Solution Solve(Input input)
         {
             var takenPictures = new List<Snapshot>();
@@ -31,7 +33,7 @@ namespace Hashcode.Qualif
 
                 for (int turn = 0; turn < input.NbTurns; ++turn)
                 {
-                    var node = tree.RadialSearch(new float[] { satellite.Pos.Lat, satellite.Pos.Lon }, satellite.MaxRot, 150).ToArray();
+                    var node = tree.RadialSearch(new float[] { satellite.Pos.Lat, satellite.Pos.Lon }, satellite.MaxRot*SQRT2, 150).ToArray();
 
                     if (node.Length > 0)
                     {
