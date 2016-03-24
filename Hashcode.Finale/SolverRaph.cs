@@ -50,13 +50,13 @@ namespace Hashcode.Qualif
 
                 for (int t = 1; t < input.NbTurns; t++)
                 {
-                    if(t%50000 == 0) Console.WriteLine(t);
+                    if(t%20000 == 0) Console.WriteLine(t);
 
                     Step(state, satellite);
                     SimplifyRanges(state);
 
                     //look for pictures to take
-                    var candidates = tree.RadialSearch(new float[] {satellite.Pos.Lat, satellite.Pos.Lon}, satellite.MaxRot*SQRT2, 150);
+                    var candidates = tree.RadialSearch(new float[] {satellite.Pos.Lat, satellite.Pos.Lon}, satellite.MaxRot*SQRT2, 150); //TOO SLOW !
                     Helper.Assert(() => candidates.Length < 145, candidates.Length);
                     candidates = candidates.Where(node => node.Value.Item2.PictureCanBeTaken(t)).ToArray();
 
@@ -65,7 +65,7 @@ namespace Hashcode.Qualif
                     {
                         var sol = state[st];
                         var range = sol.CurrentRange;
-                        foreach (var candidate in candidates)
+                        foreach (var candidate in candidates) //TODO parallelize
                         {
                             var picLoc = candidate.Value.Item2.Locations[candidate.Value.Item1];
                             if(sol.PicturesTaken.Contains(picLoc))
@@ -77,7 +77,7 @@ namespace Hashcode.Qualif
                                 var newCommands = new List<Snapshot>(sol.Snapshots);
                                 newCommands.Add(new Snapshot(picLoc.Lat, picLoc.Lon, t, satellite.Id));
                                 var newRange = new Range(satellite.Pos, picLoc);
-                                var taken = new HashSet<Coords>(sol.PicturesTaken);
+                                var taken = new HashSet<Coords>(sol.PicturesTaken); //TODO replace with bitarray
                                 taken.Add(picLoc);
                                 state.Add(new PartialSolution (newScore, newRange, newCommands, taken));
                             }
@@ -115,6 +115,7 @@ namespace Hashcode.Qualif
 
         private static void SimplifyRanges(List<PartialSolution> state)
         {
+            //TODO find better algo than n²
             for (int i = 0; i < state.Count; i++)
             {
                 var sol = state[i];
