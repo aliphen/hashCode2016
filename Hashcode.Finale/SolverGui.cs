@@ -51,6 +51,7 @@ namespace Hashcode.Qualif
                             var snap = satellite.TakePicture(pictCoord);
                             takenPictures.Add(snap);
                             pict.Value.TakePicture(pictCoord);
+                            pict.Value.Locations.Remove(pictCoord);
                             tree.RemoveAt(pict.Point);
                             Console.WriteLine("Satellite {1} Found {0} pict - Turn {2}", node.Length, satellite.Id, turn);
 

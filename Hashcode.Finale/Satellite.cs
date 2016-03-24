@@ -76,8 +76,8 @@ namespace Hashcode.Qualif
 
         public bool CanTakePicture(Coords pict)
         {
-            return ((pict.Lat <= Pos.Lat + Range.DeltaLatMax) && (pict.Lat >= Pos.Lat + Range.DeltaLatMin)) && (pict.Lon >= Pos.Lon + Range.DeltaLatMin) &&
-                   (pict.Lon <= Pos.Lon + Range.DeltaLatMax);
+            return ((pict.Lat <= Pos.Lat + Range.DeltaLatMax) && (pict.Lat >= Pos.Lat + Range.DeltaLatMin)) && (pict.Lon >= Pos.Lon + Range.DeltaLonMin) &&
+                   (pict.Lon <= Pos.Lon + Range.DeltaLonMax);
         }
 
         public bool CanTakePicture(int pictLat, int pictLon)
