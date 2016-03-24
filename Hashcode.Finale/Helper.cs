@@ -11,10 +11,11 @@ namespace Hashcode.Qualif
     {
         public static Random Rand = new Random();
 
-        public static void Assert(Func<bool> test, string message = "")
+        public static void Assert(Func<bool> test, object message = null)
         {
 #if DEBUG
-            Debug.Assert(test(), message);
+            var msgStr = message != null ? message.ToString() : String.Empty;
+            Debug.Assert(test(), msgStr);
 #endif
         }
 
