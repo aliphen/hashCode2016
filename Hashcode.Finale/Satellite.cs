@@ -64,14 +64,7 @@ namespace Hashcode.Qualif
 
             AdjustLongitude(Pos);
 
-            Range.DeltaLatMin -= RotSpeed*nbTurns;
-            Range.DeltaLatMin = Math.Max(Range.DeltaLatMin, -MaxRot);
-            Range.DeltaLatMax += RotSpeed*nbTurns;
-            Range.DeltaLatMax = Math.Min(Range.DeltaLatMax, MaxRot);
-            Range.DeltaLonMin -= RotSpeed*nbTurns;
-            Range.DeltaLonMin = Math.Max(Range.DeltaLonMin, -MaxRot);
-            Range.DeltaLonMax += RotSpeed*nbTurns;
-            Range.DeltaLonMax = Math.Min(Range.DeltaLonMax, MaxRot);
+            Range.Increase(nbTurns, RotSpeed, MaxRot);
         }
 
         public bool CanTakePicture(Coords pict)

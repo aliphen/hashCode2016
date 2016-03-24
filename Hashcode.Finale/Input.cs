@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
@@ -21,6 +22,18 @@ namespace Hashcode.Qualif
             DeltaLatMax = range.DeltaLatMax;
             DeltaLonMin = range.DeltaLonMin;
             DeltaLonMax = range.DeltaLonMax;
+        }
+
+        public void Increase(int nbTurns, int rotSpeed, int maxRot)
+        {
+            DeltaLatMin -= rotSpeed * nbTurns;
+            DeltaLatMin = Math.Max(DeltaLatMin, -maxRot);
+            DeltaLatMax += rotSpeed * nbTurns;
+            DeltaLatMax = Math.Min(DeltaLatMax, maxRot);
+            DeltaLonMin -= rotSpeed * nbTurns;
+            DeltaLonMin = Math.Max(DeltaLonMin, -maxRot);
+            DeltaLonMax += rotSpeed * nbTurns;
+            DeltaLonMax = Math.Min(DeltaLonMax, maxRot);
         }
 
         public override string ToString()
