@@ -45,11 +45,5 @@ namespace Hashcode.Qualif
             return false;
         }
 
-        public static bool IsInRange(this Satellite s, Coords c)
-        {
-            var dLat = Math.Abs(s.Pos.Lat - c.Lat);
-            var dLon = Math.Abs(s.Pos.Lon - c.Lon);
-            return dLat < s.MaxRot && dLon < s.MaxRot;
-        }
     }
 }

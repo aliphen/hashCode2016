@@ -26,7 +26,7 @@ namespace Hashcode.Qualif
                     var input = Parser.Parse(fileName);
 
                     var sw = Stopwatch.StartNew();
-                    var solution = SolverGui.Solve(input);
+                    var solution = SolverRaph.Solve(input);
                     Console.WriteLine(fileName.Substring(6, 7) + "\t" + solution.Score + "\t" + sw.ElapsedMilliseconds + "ms");
 
                     //write output file if better than before
