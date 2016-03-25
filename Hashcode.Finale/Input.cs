@@ -82,13 +82,15 @@ namespace Hashcode.Qualif
 
     public class PicCollection
     {
+        public readonly int BasePicId;
         public readonly int Value;
         public readonly List<Coords> Locations;
         public readonly List<TimeRange> TimeRanges;
         public readonly List<Coords> TakenPictures;
 
-        public PicCollection(int value)
+        public PicCollection(int value, int basePicId)
         {
+            BasePicId = basePicId;
             Value = value;
             Locations = new List<Coords>();
             TimeRanges = new List<TimeRange>();

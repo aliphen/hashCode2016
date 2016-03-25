@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using KdTree;
 using KdTree.Math;
+using System.Collections;
 
 namespace Hashcode.Qualif
 {
@@ -13,16 +14,16 @@ namespace Hashcode.Qualif
         public readonly Range CurrentRange;
         public readonly List<Snapshot> Snapshots;
         public readonly int EstimatedValue;
-        public readonly HashSet<Coords> PicturesTaken;
+        public readonly BitArray PicturesTaken;
 
-        public PartialSolution(HashSet<Coords> taken)
+        public PartialSolution(BitArray taken)
         {
             CurrentRange = new Range();
             Snapshots = new List<Snapshot>();
             PicturesTaken = taken;
         }
 
-        public PartialSolution(int val, Range range, List<Snapshot> snaps, HashSet<Coords> taken)
+        public PartialSolution(int val, Range range, List<Snapshot> snaps, BitArray taken)
         {
             EstimatedValue = val;
             CurrentRange = range;
@@ -38,9 +39,10 @@ namespace Hashcode.Qualif
         public static Solution Solve(Input input)
         {
             var tree = BuildTree(input);
+            var totalNbPic = tree.Count;
             var solution = new List<Snapshot>();
 
-            var picturesConfirmed = new HashSet<Coords>();
+            var picturesConfirmed = new BitArray(totalNbPic);
             for (int s = 0; s < input.Satellites.Count; s++)
             {
                 Console.WriteLine($"satellite {s}");
@@ -67,18 +69,20 @@ namespace Hashcode.Qualif
                         var range = sol.CurrentRange;
                         foreach (var candidate in candidates) //TODO parallelize
                         {
-                            var picLoc = candidate.Value.Item2.Locations[candidate.Value.Item1];
-                            if(sol.PicturesTaken.Contains(picLoc))
+                            var collec = candidate.Value.Item2;
+                            var picIdx = candidate.Value.Item1;
+                            if(sol.PicturesTaken.Get(collec.BasePicId + picIdx))
                                 continue;
 
+                            var picLoc = collec.Locations[picIdx];
                             if (picLoc.IsInRange(range, satellite.Pos))
                             {
-                                var newScore = sol.EstimatedValue + Score(candidate.Value.Item2);
+                                var newScore = sol.EstimatedValue + Score(collec);
                                 var newCommands = new List<Snapshot>(sol.Snapshots);
                                 newCommands.Add(new Snapshot(picLoc.Lat, picLoc.Lon, t, satellite.Id));
                                 var newRange = new Range(satellite.Pos, picLoc);
-                                var taken = new HashSet<Coords>(sol.PicturesTaken); //TODO replace with bitarray
-                                taken.Add(picLoc);
+                                var taken = new BitArray(sol.PicturesTaken);
+                                taken.Set(collec.BasePicId + picIdx, true);
                                 state.Add(new PartialSolution (newScore, newRange, newCommands, taken));
                             }
                         }
@@ -92,7 +96,7 @@ namespace Hashcode.Qualif
                         best = partialSolution;
                 }
                 solution.AddRange(best.Snapshots);
-                picturesConfirmed.UnionWith(best.PicturesTaken);
+                picturesConfirmed.Or(best.PicturesTaken); //union
             }
             
             return new Solution(solution, 2);

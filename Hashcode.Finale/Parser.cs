@@ -28,11 +28,13 @@ namespace Hashcode.Qualif
                 }
 
                 var nbCollec = ReadInt(reader);
+                var picId = 0;
                 for (int i = 0; i < nbCollec; i++)
                 {
                     var line = ReadMulti(reader);
-                    var collec = new PicCollection(value: line[0]);
+                    var collec = new PicCollection(line[0], picId);
                     var nbLoc = line[1];
+                    picId += nbLoc;
                     for (int j = 0; j < nbLoc; j++)
                     {
                         var loc = ReadMulti(reader);
