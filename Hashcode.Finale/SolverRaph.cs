@@ -78,9 +78,12 @@ namespace Hashcode.Qualif
                             if (picLoc.IsInRange(range, satellite.Pos))
                             {
                                 var newScore = sol.EstimatedValue + Score(collec);
+                                var newRange = new Range(satellite.Pos, picLoc);
+                                if (!WorthTaking(newScore, newRange, state))
+                                    continue;
+
                                 var newCommands = new List<Snapshot>(sol.Snapshots);
                                 newCommands.Add(new Snapshot(picLoc.Lat, picLoc.Lon, t, satellite.Id));
-                                var newRange = new Range(satellite.Pos, picLoc);
                                 var taken = new BitArray(sol.PicturesTaken);
                                 taken.Set(collec.BasePicId + picIdx, true);
                                 state.Add(new PartialSolution (newScore, newRange, newCommands, taken));
@@ -139,6 +142,17 @@ namespace Hashcode.Qualif
                     }
                 }
             }
+        }
+
+        static bool WorthTaking(int newScore, Range newRange, List<PartialSolution> state)
+        {
+            for (int i = 0; i < state.Count; i++)
+            {
+                var sol = state[i];
+                if (newScore <= sol.EstimatedValue && sol.CurrentRange.Contains(newRange))
+                    return false;
+            }
+            return true;
         }
 
         private static KdTree<float, Tuple<int, PicCollection>> BuildTree(Input input)
