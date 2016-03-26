@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using KdTree;
 using KdTree.Math;
 using System.Collections;
+using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
+using NUnit.Framework.Compatibility;
 
 namespace Hashcode.Qualif
 {
@@ -13,7 +16,7 @@ namespace Hashcode.Qualif
     {
         public readonly Range CurrentRange;
         public readonly List<Snapshot> Snapshots;
-        public readonly int EstimatedValue;
+        public readonly float EstimatedValue;
         public readonly BitArray PicturesTaken;
 
         public PartialSolution(BitArray taken)
@@ -23,7 +26,7 @@ namespace Hashcode.Qualif
             PicturesTaken = taken;
         }
 
-        public PartialSolution(int val, Range range, List<Snapshot> snaps, BitArray taken)
+        public PartialSolution(float val, Range range, List<Snapshot> snaps, BitArray taken)
         {
             EstimatedValue = val;
             CurrentRange = range;
@@ -39,20 +42,21 @@ namespace Hashcode.Qualif
         public static Solution Solve(Input input)
         {
             var tree = BuildTree(input);
+            var satellites = input.Satellites.OrderBy(s => s.MaxRot).ToArray();
             var totalNbPic = tree.Count;
             var solution = new List<Snapshot>();
 
             var picturesConfirmed = new BitArray(totalNbPic);
-            for (int s = 0; s < input.Satellites.Count; s++)
+            for (int s = 0; s < satellites.Length; s++)
             {
-                Console.WriteLine($"satellite {s}");
-                var satellite = input.Satellites[s];
-                
+                var satellite = satellites[s];
+                Console.WriteLine($"satellite {s+1}/{satellites.Length} (#{satellite.Id})");
+
                 var state = new List<PartialSolution> {new PartialSolution(picturesConfirmed)};
 
                 for (int t = 1; t < input.NbTurns; t++)
                 {
-                    if(t%20000 == 0) Console.WriteLine(t);
+                    if (t % 20000 == 0) Console.WriteLine(t);
 
                     Step(state, satellite);
                     SimplifyRanges(state);
@@ -60,14 +64,15 @@ namespace Hashcode.Qualif
                     //look for pictures to take
                     var candidates = tree.RadialSearch(new float[] {satellite.Pos.Lat, satellite.Pos.Lon}, satellite.MaxRot*SQRT2, 150); //TOO SLOW !
                     Helper.Assert(() => candidates.Length < 145, candidates.Length);
-                    candidates = candidates.Where(node => node.Value.Item2.PictureCanBeTaken(t)).ToArray();
+                    candidates = candidates.Where(node => !picturesConfirmed.Get(node.Value.Item1 + node.Value.Item2.BasePicId) && node.Value.Item2.PictureCanBeTaken(t)).ToArray();
+
 
                     var stopIdx = state.Count; //we're gonna add more, but we don't want to browse'em
                     for (int st = 0; st < stopIdx; st++)
                     {
                         var sol = state[st];
                         var range = sol.CurrentRange;
-                        foreach (var candidate in candidates) //TODO parallelize
+                        foreach (var candidate in candidates)
                         {
                             var collec = candidate.Value.Item2;
                             var picIdx = candidate.Value.Item1;
@@ -77,7 +82,7 @@ namespace Hashcode.Qualif
                             var picLoc = collec.Locations[picIdx];
                             if (picLoc.IsInRange(range, satellite.Pos))
                             {
-                                var newScore = sol.EstimatedValue + Score(collec);
+                                var newScore = sol.EstimatedValue + Score(collec, sol);
                                 var newRange = new Range(satellite.Pos, picLoc);
                                 if (!WorthTaking(newScore, newRange, state))
                                     continue;
@@ -101,14 +106,41 @@ namespace Hashcode.Qualif
                 solution.AddRange(best.Snapshots);
                 picturesConfirmed.Or(best.PicturesTaken); //union
             }
-            
-            return new Solution(solution, 2);
+
+            int score = 0;
+            foreach (var picCollection in input.Collections)
+            {
+                bool complete = true;
+                var stop = picCollection.BasePicId + picCollection.Locations.Count;
+                for (int i = picCollection.BasePicId; i < stop; i++)
+                {
+                    if (!picturesConfirmed.Get(i))
+                    {
+                        complete = false;
+                        break;
+                    }
+                }
+                if (complete)
+                    score += picCollection.Value;
+            }
+            return new Solution(solution, score);
         }
 
-        private static int Score(PicCollection picCollection)
+        private static float Score(PicCollection picCollection, PartialSolution sol)
         {
-            //TODO be smarter
-            return picCollection.Value/picCollection.Locations.Count;
+            var completion = 0;
+            var stop = picCollection.BasePicId + picCollection.Locations.Count;
+            for (int i = picCollection.BasePicId; i < stop; i++)
+            {
+                if (sol.PicturesTaken.Get(i))
+                    completion++;
+            }
+            float x;
+            if (completion == picCollection.Locations.Count - 1)
+                x = 10f;
+            else
+                x = (float) (completion + 1)/(picCollection.Locations.Count + 1);
+            return x*x*picCollection.Value/picCollection.Locations.Count;
         }
 
         private static void Step(List<PartialSolution> ranges, Satellite sat)
@@ -126,6 +158,9 @@ namespace Hashcode.Qualif
             for (int i = 0; i < state.Count; i++)
             {
                 var sol = state[i];
+                if(!sol.CurrentRange.OneSideMaxed)
+                    continue;
+
                 for (int j = 0; j < state.Count; j++)
                 {
                     if(j == i) //do not check with self
@@ -144,15 +179,18 @@ namespace Hashcode.Qualif
             }
         }
 
-        static bool WorthTaking(int newScore, Range newRange, List<PartialSolution> state)
+        static bool WorthTaking(float newScore, Range newRange, List<PartialSolution> state)
         {
-            for (int i = 0; i < state.Count; i++)
+            bool take = true;
+            Parallel.ForEach(state, (sol, loop) =>
             {
-                var sol = state[i];
                 if (newScore <= sol.EstimatedValue && sol.CurrentRange.Contains(newRange))
-                    return false;
-            }
-            return true;
+                {
+                    take = false;
+                    loop.Stop();
+                }
+            });
+            return take;
         }
 
         private static KdTree<float, Tuple<int, PicCollection>> BuildTree(Input input)

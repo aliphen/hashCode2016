@@ -7,6 +7,7 @@ namespace Hashcode.Qualif
 {
     public class Range
     {
+        public bool OneSideMaxed { get; private set; }
         public int DeltaLatMin;
         public int DeltaLatMax;
         public int DeltaLonMin;
@@ -40,13 +41,29 @@ namespace Hashcode.Qualif
         public void Increase(int nbTurns, int rotSpeed, int maxRot)
         {
             DeltaLatMin -= rotSpeed * nbTurns;
-            DeltaLatMin = Math.Max(DeltaLatMin, -maxRot);
+            if (DeltaLatMin <= -maxRot)
+            {
+                OneSideMaxed = true;
+                DeltaLatMin = -maxRot;
+            }
             DeltaLatMax += rotSpeed * nbTurns;
-            DeltaLatMax = Math.Min(DeltaLatMax, maxRot);
+            if (DeltaLatMax >= maxRot)
+            {
+                OneSideMaxed = true;
+                DeltaLatMax = maxRot;
+            }
             DeltaLonMin -= rotSpeed * nbTurns;
-            DeltaLonMin = Math.Max(DeltaLonMin, -maxRot);
+            if (DeltaLonMin <= -maxRot)
+            {
+                OneSideMaxed = true;
+                DeltaLonMin = -maxRot;
+            }
             DeltaLonMax += rotSpeed * nbTurns;
-            DeltaLonMax = Math.Min(DeltaLonMax, maxRot);
+            if (DeltaLonMax >= maxRot)
+            {
+                OneSideMaxed = true;
+                DeltaLonMax = maxRot;
+            }
         }
 
         public bool Contains(Range other)
